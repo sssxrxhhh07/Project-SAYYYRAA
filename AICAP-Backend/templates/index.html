@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CogniAlarm — AI Intelligent Cognitive Alarm Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#090c11;
+  --bg-panel:#10161f;
+  --bg-panel-alt:#141c27;
+  --bg-raised:#182130;
+  --border:#232e3d;
+  --border-soft:#1a2230;
+  --text:#e8edf5;
+  --text-dim:#8b97a9;
+  --text-faint:#556074;
+  --amber:#ffb454;
+  --cyan:#5eeacd;
+  --violet:#9098ff;
+  --red:#ff6b6b;
+  --green:#4ade80;
+  --font-head:'Space Grotesk',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius:14px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-mono);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(144,152,255,.10), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 10%, rgba(94,234,205,.08), transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+h1,h2,h3,h4,button,.font-head{font-family:var(--font-head);}
+a{color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+::selection{background:rgba(144,152,255,.35);}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+
+/* focus visibility */
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:2px solid var(--cyan); outline-offset:2px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+}
+
+/* ---------- Top bar ---------- */
+#topbar{
+  position:sticky;top:0;z-index:50;
+  display:none;
+  align-items:center;justify-content:space-between;
+  padding:14px 28px;
+  background:rgba(9,12,17,.86);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border-soft);
+}
+#topbar.show{display:flex;}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-head);font-weight:700;letter-spacing:.02em;}
+.brand .pulse-dot{
+  width:9px;height:9px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 0 0 rgba(94,234,205,.6);
+  animation:pulse 2.4s infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(94,234,205,.55);}
+  70%{box-shadow:0 0 0 9px rgba(94,234,205,0);}
+  100%{box-shadow:0 0 0 0 rgba(94,234,205,0);}
+}
+.brand small{color:var(--text-dim);font-family:var(--font-mono);font-weight:400;font-size:11px;letter-spacing:.08em;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.user-chip{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-dim);}
+.user-chip .avatar{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-weight:700;font-size:13px;
+  background:var(--role-color,var(--violet));color:#0a0e14;
+}
+.btn{
+  border:1px solid var(--border);
+  background:var(--bg-raised);
+  color:var(--text);
+  padding:9px 16px;border-radius:9px;font-size:13px;font-weight:500;
+  transition:border-color .15s,transform .1s,background .15s;
+}
+.btn:hover{border-color:var(--text-faint);background:var(--bg-panel-alt);}
+.btn:active{transform:translateY(1px);}
+.btn-ghost{background:transparent;}
+.btn-accent{background:var(--cyan);color:#06201a;border-color:var(--cyan);font-weight:700;}
+.btn-accent:hover{filter:brightness(1.08);}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:7px;}
+.btn-danger{color:var(--red);border-color:rgba(255,107,107,.35);}
+.btn-danger:hover{background:rgba(255,107,107,.08);}
+
+/* ---------- Layout / pages ---------- */
+main{position:relative;z-index:1;}
+.page{display:none;}
+.page.active{display:block;}
+
+/* ===== Landing ===== */
+#page-landing{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:64px 24px 40px;}
+.landing-wrap{max-width:1080px;width:100%;}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--cyan);border:1px solid rgba(94,234,205,.25);
+  background:rgba(94,234,205,.06);
+  padding:6px 12px;border-radius:100px;margin-bottom:22px;
+}
+.hero{display:grid;grid-template-columns:1.15fr 1fr;gap:48px;align-items:center;}
+@media(max-width:900px){.hero{grid-template-columns:1fr;}}
+.hero h1{
+  font-family:var(--font-head);font-size:44px;line-height:1.08;letter-spacing:-.01em;
+  margin:0 0 18px;font-weight:700;
+}
+.hero h1 .accentline{
+  background:linear-gradient(90deg,var(--cyan),var(--violet));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p.lead{color:var(--text-dim);font-size:15.5px;line-height:1.7;max-width:520px;margin:0 0 26px;font-family:var(--font-mono);}
+.hero-stats{display:flex;gap:28px;margin-top:8px;}
+.hero-stats div{border-left:2px solid var(--border);padding-left:12px;}
+.hero-stats strong{display:block;font-family:var(--font-head);font-size:20px;color:var(--text);}
+.hero-stats span{font-size:11px;color:var(--text-faint);letter-spacing:.05em;text-transform:uppercase;}
+
+/* waveform signature panel */
+.wave-panel{
+  background:var(--bg-panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px 22px 16px;
+}
+.wave-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.wave-panel-head .label{font-size:11px;letter-spacing:.1em;color:var(--text-faint);text-transform:uppercase;}
+.wave-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green);}
+.wave-status .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+canvas#waveCanvas{width:100%;height:150px;display:block;}
+.wave-readouts{display:flex;gap:18px;margin-top:10px;padding-top:12px;border-top:1px solid var(--border-soft);}
+.wave-readouts div{flex:1;}
+.wave-readouts .v{font-family:var(--font-head);font-size:18px;font-weight:700;}
+.wave-readouts .k{font-size:10.5px;color:var(--text-faint);letter-spacing:.05em;text-transform:uppercase;}
+
+/* role picker */
+.picker{margin-top:56px;}
+.picker-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:20px;}
+.picker-head h2{font-size:20px;margin:0 0 4px;font-family:var(--font-head);}
+.picker-head p{margin:0;color:var(--text-dim);font-size:13px;}
+.name-field{display:flex;gap:8px;align-items:center;}
+.name-field input{
+  background:var(--bg-panel);border:1px solid var(--border);color:var(--text);
+  padding:10px 14px;border-radius:9px;font-family:var(--font-mono);font-size:13px;width:200px;
+}
+.role-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+@media(max-width:900px){.role-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.role-grid{grid-template-columns:1fr;}}
+.role-card{
+  background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:22px 20px;text-align:left;display:flex;flex-direction:column;gap:10px;
+  transition:border-color .18s, transform .18s, background .18s;
+}
+.role-card:hover{border-color:var(--rc,var(--cyan));transform:translateY(-3px);background:var(--bg-panel-alt);}
+.role-card .icon-badge{
+  width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb, var(--rc,var(--cyan)) 16%, transparent);
+  color:var(--rc,var(--cyan));
+}
+.role-card .icon-badge svg{width:20px;height:20px;}
+.role-card h3{margin:2px 0 0;font-size:16px;}
+.role-card p{margin:0;font-size:12.5px;color:var(--text-dim);line-height:1.55;flex:1;}
+.role-card .go{
+  margin-top:6px;font-size:12px;font-weight:600;color:var(--rc,var(--cyan));
+  display:flex;align-items:center;gap:6px;
+}
+.role-card .go svg{width:13px;height:13px;transition:transform .15s;}
+.role-card:hover .go svg{transform:translateX(3px);}
+
+.foot-note{margin-top:40px;text-align:center;color:var(--text-faint);font-size:11.5px;}
+
+/* ===== Auth panel ===== */
+.auth-wrap{margin-top:56px;display:grid;grid-template-columns:1fr 1.15fr;gap:36px;align-items:flex-start;}
+@media(max-width:900px){.auth-wrap{grid-template-columns:1fr;}}
+.auth-card{
+  background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:26px 26px 22px;
+}
+.auth-tabs{display:flex;gap:4px;background:var(--bg-raised);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:20px;}
+.auth-tab{
+  flex:1;text-align:center;padding:9px 10px;border-radius:7px;font-size:13px;font-weight:600;
+  color:var(--text-dim);background:transparent;border:none;transition:background .15s,color .15s;
+}
+.auth-tab.active{background:var(--bg-panel);color:var(--text);}
+.auth-form{display:flex;flex-direction:column;gap:14px;}
+.auth-form.hidden{display:none;}
+.field-label{font-size:11.5px;color:var(--text-faint);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;display:block;}
+.field-wrap{display:flex;flex-direction:column;}
+.field-wrap input,.field-wrap select{
+  background:var(--bg-raised);border:1px solid var(--border);color:var(--text);
+  padding:11px 13px;border-radius:9px;font-family:var(--font-mono);font-size:13.5px;width:100%;
+}
+.field-wrap input:focus,.field-wrap select:focus{border-color:var(--cyan);}
+.pw-row{position:relative;}
+.pw-row input{padding-right:64px;}
+.pw-toggle{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  background:transparent;border:none;color:var(--text-faint);font-size:11px;font-weight:600;
+  padding:6px 8px;letter-spacing:.03em;
+}
+.pw-toggle:hover{color:var(--text);}
+.role-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.role-pill{
+  border:1px solid var(--border);background:var(--bg-raised);color:var(--text-dim);
+  padding:10px 8px;border-radius:9px;font-size:12.5px;font-weight:600;text-align:center;
+  transition:border-color .15s,color .15s,background .15s;
+}
+.role-pill.selected{border-color:var(--rp,var(--cyan));color:var(--text);background:color-mix(in srgb, var(--rp,var(--cyan)) 14%, transparent);}
+.auth-error{
+  font-size:12.5px;color:var(--red);background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.3);
+  border-radius:8px;padding:9px 12px;display:none;
+}
+.auth-error.show{display:block;}
+.auth-submit{width:100%;padding:12px;font-size:13.5px;margin-top:4px;}
+.pw-strength{display:flex;gap:4px;margin-top:6px;}
+.pw-strength span{height:3px;flex:1;border-radius:2px;background:var(--border);}
+.pw-hint{font-size:11px;color:var(--text-faint);margin-top:2px;}
+
+.auth-side{
+  background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:22px 24px;
+}
+.auth-side h3{margin:0 0 4px;font-size:15px;font-family:var(--font-head);}
+.auth-side p{margin:0 0 16px;color:var(--text-dim);font-size:12.5px;line-height:1.6;}
+.demo-list{display:flex;flex-direction:column;gap:8px;}
+.demo-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border:1px solid var(--border);background:var(--bg-raised);border-radius:9px;padding:10px 12px;
+}
+.demo-row .who{display:flex;align-items:center;gap:10px;}
+.demo-row .dot{width:8px;height:8px;border-radius:50%;background:var(--dc,var(--cyan));}
+.demo-row .lbl{font-size:12.5px;font-weight:600;}
+.demo-row .sub{font-size:10.5px;color:var(--text-faint);font-family:var(--font-mono);}
+.security-note{
+  margin-top:16px;padding-top:14px;border-top:1px solid var(--border-soft);
+  font-size:11px;color:var(--text-faint);line-height:1.6;
+}
+.security-note b{color:var(--text-dim);}
+
+/* ===== Dashboard shell ===== */
+.dash-shell{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 61px);}
+@media(max-width:820px){.dash-shell{grid-template-columns:1fr;}}
+.sidebar{
+  border-right:1px solid var(--border-soft);
+  padding:22px 14px;
+  background:var(--bg-panel);
+}
+@media(max-width:820px){.sidebar{border-right:none;border-bottom:1px solid var(--border-soft);display:flex;overflow-x:auto;gap:6px;padding:12px;}}
+.sidebar-title{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);padding:0 10px 10px;}
+@media(max-width:820px){.sidebar-title{display:none;}}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:9px;color:var(--text-dim);
+  font-size:13.5px;font-weight:500;margin-bottom:2px;white-space:nowrap;
+  border:1px solid transparent;
+}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;}
+.nav-item:hover{background:var(--bg-panel-alt);color:var(--text);}
+.nav-item.active{background:rgba(144,152,255,.1);color:var(--text);border-color:rgba(144,152,255,.25);}
+.dash-content{padding:26px 30px 60px;max-width:1180px;}
+.view{display:none;}
+.view.active{display:block;animation:fadein .25s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+.view-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+.view-head h2{font-size:22px;margin:0 0 4px;}
+.view-head p{margin:0;color:var(--text-dim);font-size:13px;}
+
+/* KPI cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:520px){.kpi-grid{grid-template-columns:1fr;}}
+.kpi{
+  background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;
+}
+.kpi .k-label{font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.kpi .k-value{font-family:var(--font-head);font-size:26px;font-weight:700;}
+.kpi .k-delta{font-size:11.5px;margin-top:4px;}
+.k-delta.up{color:var(--green);}
+.k-delta.down{color:var(--red);}
+.k-delta.flat{color:var(--text-faint);}
+
+.grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr;}}
+
+.panel{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.panel-head h3{margin:0;font-size:14.5px;font-family:var(--font-head);}
+.panel-head .tag{font-size:10.5px;color:var(--text-faint);border:1px solid var(--border);padding:3px 8px;border-radius:100px;}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;color:var(--text-faint);font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--border);}
+td{padding:10px 10px;border-bottom:1px solid var(--border-soft);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.015);}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:100px;font-weight:600;}
+.badge.crit{background:rgba(255,107,107,.12);color:var(--red);}
+.badge.warn{background:rgba(255,180,84,.12);color:var(--amber);}
+.badge.ok{background:rgba(74,222,128,.12);color:var(--green);}
+.badge.info{background:rgba(144,152,255,.12);color:var(--violet);}
+.badge.mut{background:rgba(139,151,169,.12);color:var(--text-dim);}
+
+.row-flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+input[type=text],input[type=search],textarea,select{
+  background:var(--bg-raised);border:1px solid var(--border);color:var(--text);
+  padding:9px 12px;border-radius:8px;font-family:var(--font-mono);font-size:12.5px;
+}
+textarea{width:100%;resize:vertical;min-height:70px;}
+input[type=range]{accent-color:var(--cyan);width:100%;}
+
+.toast-wrap{position:fixed;bottom:22px;right:22px;z-index:200;display:flex;flex-direction:column;gap:10px;}
+.toast{
+  background:var(--bg-raised);border:1px solid var(--border);border-left:3px solid var(--cyan);
+  padding:12px 16px;border-radius:9px;font-size:13px;min-width:240px;max-width:320px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  animation:slidein .2s ease;
+}
+.toast.crit{border-left-color:var(--red);}
+.toast.ok{border-left-color:var(--green);}
+@keyframes slidein{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:none;}}
+
+.access-note{
+  max-width:420px;margin:120px auto;text-align:center;
+  background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:34px 28px;
+}
+.access-note h2{margin-top:0;}
+.access-note p{color:var(--text-dim);font-size:13.5px;line-height:1.6;}
+
+.mini-bar-wrap{display:flex;align-items:flex-end;gap:6px;height:90px;}
+.mini-bar{flex:1;background:linear-gradient(180deg,var(--cyan),rgba(94,234,205,.15));border-radius:4px 4px 0 0;min-height:4px;position:relative;}
+.mini-bar .lbl{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:9.5px;color:var(--text-faint);}
+
+.gauge-wrap{display:flex;align-items:center;gap:18px;}
+.gauge{width:104px;height:104px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;}
+.gauge .inner{width:78px;height:78px;border-radius:50%;background:var(--bg-panel);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.gauge .inner .num{font-family:var(--font-head);font-size:20px;font-weight:700;}
+.gauge .inner .sub{font-size:9px;color:var(--text-faint);}
+
+.checklist-item{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border-soft);}
+.checklist-item:last-child{border-bottom:none;}
+.checklist-item.done .cl-text{text-decoration:line-through;color:var(--text-faint);}
+.cl-text{flex:1;font-size:13px;}
+.cl-time{font-size:11px;color:var(--text-faint);}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--cyan);}
+
+.alarm-item{display:flex;gap:12px;align-items:flex-start;padding:12px 4px;border-bottom:1px solid var(--border-soft);}
+.alarm-item:last-child{border-bottom:none;}
+.alarm-item .dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.alarm-item .body{flex:1;}
+.alarm-item .title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.alarm-item .meta{font-size:11px;color:var(--text-faint);}
+.progress-bar{height:8px;background:var(--bg-raised);border-radius:100px;overflow:hidden;border:1px solid var(--border);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet));border-radius:100px;transition:width .3s;}
+
+.patient-row{cursor:pointer;}
+.patient-row.selected td{background:rgba(144,152,255,.08);}
+.empty-state{padding:30px 10px;text-align:center;color:var(--text-faint);font-size:13px;}
+.log-entry{font-size:12.5px;padding:8px 4px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);}
+.log-entry:last-child{border-bottom:none;}
+.log-entry b{color:var(--text);}
+.pill-toggle{display:flex;gap:6px;flex-wrap:wrap;}
+.pill-toggle button{
+  border:1px solid var(--border);background:transparent;color:var(--text-dim);
+  padding:6px 12px;border-radius:100px;font-size:11.5px;
+}
+.pill-toggle button.active{background:var(--cyan);color:#06201a;border-color:var(--cyan);font-weight:700;}
+
+hr.sep{border:none;border-top:1px solid var(--border-soft);margin:16px 0;}
+.two-col-panel{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:700px){.two-col-panel{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <div class="brand">
+    <span class="pulse-dot"></span>
+    CogniAlarm <small>AI COGNITIVE ALARM PLATFORM</small>
+  </div>
+  <div class="topbar-right">
+    <div class="user-chip">
+      <div class="avatar" id="topbarAvatar">?</div>
+      <div>
+        <div id="topbarName" style="color:var(--text);font-weight:600;">—</div>
+        <div id="topbarRole" style="font-size:11px;">—</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="logoutBtn">Sign out</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ LANDING PAGE ============ -->
+  <section class="page active" id="page-landing">
+    <div class="landing-wrap">
+      <span class="eyebrow">● live cognitive monitoring network</span>
+      <div class="hero">
+        <div>
+          <h1>Alarms that understand<br><span class="accentline">the mind, not just the clock.</span></h1>
+          <p class="lead">CogniAlarm reads focus, fatigue and stress signals from wearables and check-ins,
+            then raises the right alert to the right person — before attention fully drops. Pick a role below to
+            open its dashboard.</p>
+          <div class="hero-stats">
+            <div><strong>12,480</strong><span>Signals / day</span></div>
+            <div><strong>96.4%</strong><span>Alarm accuracy</span></div>
+            <div><strong>2.1s</strong><span>Avg. alert latency</span></div>
+          </div>
+        </div>
+        <div class="wave-panel">
+          <div class="wave-panel-head">
+            <span class="label">Cognitive signal — live</span>
+            <span class="wave-status"><span class="dot"></span> stable</span>
+          </div>
+          <canvas id="waveCanvas" width="500" height="150"></canvas>
+          <div class="wave-readouts">
+            <div><div class="v" id="wvFocus" style="color:var(--cyan);">—</div><div class="k">Focus idx</div></div>
+            <div><div class="v" id="wvFatigue" style="color:var(--amber);">—</div><div class="k">Fatigue idx</div></div>
+            <div><div class="v" id="wvAlarms" style="color:var(--violet);">—</div><div class="k">Alarms/hr</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-wrap">
+        <div class="auth-card">
+          <div class="auth-tabs">
+            <button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">Sign in</button>
+            <button class="auth-tab" id="tabSignupBtn" onclick="switchAuthTab('signup')">Create account</button>
+          </div>
+
+          <!-- LOGIN -->
+          <form class="auth-form" id="loginForm" onsubmit="return handleLogin(event)">
+            <div class="auth-error" id="loginError"></div>
+            <div class="field-wrap">
+              <label class="field-label" for="loginEmail">Email</label>
+              <input type="email" id="loginEmail" autocomplete="username" placeholder="you@cognialarm.io" required>
+            </div>
+            <div class="field-wrap">
+              <label class="field-label" for="loginPassword">Password</label>
+              <div class="pw-row">
+                <input type="password" id="loginPassword" autocomplete="current-password" placeholder="••••••••" required>
+                <button type="button" class="pw-toggle" onclick="togglePw('loginPassword',this)">SHOW</button>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-accent auth-submit" id="loginSubmitBtn">Sign in</button>
+          </form>
+
+          <!-- SIGNUP -->
+          <form class="auth-form hidden" id="signupForm" onsubmit="return handleSignup(event)">
+            <div class="auth-error" id="signupError"></div>
+            <div class="field-wrap">
+              <label class="field-label" for="signupName">Full name</label>
+              <input type="text" id="signupName" autocomplete="name" placeholder="Ananya Sharma" required>
+            </div>
+            <div class="field-wrap">
+              <label class="field-label" for="signupEmail">Email</label>
+              <input type="email" id="signupEmail" autocomplete="username" placeholder="you@cognialarm.io" required>
+            </div>
+            <div class="field-wrap">
+              <label class="field-label" for="signupPassword">Password</label>
+              <div class="pw-row">
+                <input type="password" id="signupPassword" autocomplete="new-password" placeholder="At least 8 characters" required minlength="8">
+                <button type="button" class="pw-toggle" onclick="togglePw('signupPassword',this)">SHOW</button>
+              </div>
+              <div class="pw-strength" id="pwStrength"><span></span><span></span><span></span><span></span></div>
+              <div class="pw-hint">Use 8+ characters with a mix of letters, numbers and symbols.</div>
+            </div>
+            <div class="field-wrap">
+              <label class="field-label" for="signupConfirm">Confirm password</label>
+              <input type="password" id="signupConfirm" autocomplete="new-password" placeholder="••••••••" required minlength="8">
+            </div>
+            <div class="field-wrap">
+              <label class="field-label">Account role</label>
+              <div class="role-select-grid" id="roleSelectGrid"></div>
+            </div>
+            <button type="submit" class="btn btn-accent auth-submit" id="signupSubmitBtn">Create account</button>
+          </form>
+        </div>
+
+        <div class="auth-side">
+          <h3>Try it instantly</h3>
+          <p>No account yet? Sign in with a seeded demo account for any role — passwords are shown for evaluation only.</p>
+          <div class="demo-list" id="demoList"></div>
+          <div class="security-note">
+            <b>How auth works here:</b> accounts are stored in a browser-local "users" table
+            (<code>localStorage</code>) with random per-user salts. Passwords are never stored in plain text —
+            they're hashed with PBKDF2 (SHA-256, 100k iterations) before being saved, and sessions use a
+            random signed-looking token with an expiry. This is a client-side simulation for demo purposes,
+            not a production auth backend.
+          </div>
+        </div>
+      </div>
+
+      <p class="foot-note">Demo build — data shown is simulated for evaluation purposes. No real patient or student data is used.</p>
+    </div>
+  </section>
+
+  <!-- ============ ADMIN DASHBOARD ============ -->
+  <section class="page" id="page-admin" data-role="admin">
+    <div class="dash-shell">
+      <nav class="sidebar" id="adminNav">
+        <div class="sidebar-title">Admin</div>
+      </nav>
+      <div class="dash-content">
+
+        <div class="view active" id="admin-overview">
+          <div class="view-head">
+            <div><h2>System overview</h2><p>Platform-wide health of the alarm network.</p></div>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi"><div class="k-label">Total users</div><div class="k-value">4,812</div><div class="k-delta up">▲ 3.2% this week</div></div>
+            <div class="kpi"><div class="k-label">Active alarms</div><div class="k-value" id="admActiveAlarms">7</div><div class="k-delta down">▼ 2 vs yesterday</div></div>
+            <div class="kpi"><div class="k-label">Devices online</div><div class="k-value">1,203 / 1,240</div><div class="k-delta flat">97.0% uptime</div></div>
+            <div class="kpi"><div class="k-label">Critical alerts</div><div class="k-value" id="admCritCount" style="color:var(--red);">3</div><div class="k-delta down">Needs review</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-head"><h3>Alarms triggered — last 7 days</h3><span class="tag">all roles</span></div>
+              <div class="mini-bar-wrap" id="adminChart" style="margin-bottom:18px;"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h3>Alerts by severity</h3></div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div class="row-flex" style="justify-content:space-between;"><span class="badge crit">Critical</span><span>3</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:15%;background:var(--red);"></div></div>
+                <div class="row-flex" style="justify-content:space-between;"><span class="badge warn">Warning</span><span>11</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:45%;background:var(--amber);"></div></div>
+                <div class="row-flex" style="justify-content:space-between;"><span class="badge ok">Resolved</span><span>26</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:80%;"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Recent system alerts</h3><span class="tag" id="admAlertTag">14 total</span></div>
+            <table>
+              <thead><tr><th>User</th><th>Role</th><th>Alarm type</th><th>Severity</th><th>Time</th><th>Status</th><th></th></tr></thead>
+              <tbody id="admAlertsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="view" id="admin-users">
+          <div class="view-head">
+            <div><h2>Manage users</h2><p>All roles registered on the platform.</p></div>
+          </div>
+          <div class="panel">
+            <div class="row-flex" style="justify-content:space-between;margin-bottom:14px;">
+              <input type="search" id="userSearch" placeholder="Search by name or role...">
+              <div class="row-flex">
+                <input type="text" id="newUserName" placeholder="Full name" style="width:140px;">
+                <select id="newUserRole">
+                  <option value="Student">Student</option>
+                  <option value="Doctor">Doctor</option>
+                  <option value="Coach">Coach</option>
+                  <option value="Admin">Admin</option>
+                </select>
+                <button class="btn btn-accent btn-sm" id="addUserBtn">Add user</button>
+              </div>
+            </div>
+            <table>
+              <thead><tr><th>Name</th><th>Role</th><th>Status</th><th>Last active</th><th></th></tr></thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="view" id="admin-alerts">
+          <div class="view-head"><div><h2>All alerts</h2><p>Every alarm event captured across roles.</p></div></div>
+          <div class="panel">
+            <div class="pill-toggle" id="admAlertFilter" style="margin-bottom:14px;">
+              <button class="active" data-f="all">All</button>
+              <button data-f="crit">Critical</button>
+              <button data-f="warn">Warning</button>
+              <button data-f="ok">Resolved</button>
+            </div>
+            <table>
+              <thead><tr><th>User</th><th>Role</th><th>Alarm type</th><th>Severity</th><th>Time</th><th>Status</th><th></th></tr></thead>
+              <tbody id="admAllAlertsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="view" id="admin-system">
+          <div class="view-head"><div><h2>System settings</h2><p>Platform-level configuration (demo only).</p></div></div>
+          <div class="two-col-panel">
+            <div class="panel">
+              <div class="panel-head"><h3>Detection sensitivity</h3></div>
+              <label style="font-size:12px;color:var(--text-dim);">Global fatigue threshold</label>
+              <input type="range" id="sysSensitivity" min="0" max="100" value="62">
+              <div class="row-flex" style="justify-content:space-between;"><span style="font-size:11px;color:var(--text-faint);">Lenient</span><span id="sysSensitivityVal" style="font-size:12px;">62%</span><span style="font-size:11px;color:var(--text-faint);">Strict</span></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h3>Notification channels</h3></div>
+              <label style="display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:13px;"><input type="checkbox" checked> Push notification</label>
+              <label style="display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:13px;"><input type="checkbox" checked> Email digest</label>
+              <label style="display:flex;gap:8px;align-items:center;font-size:13px;"><input type="checkbox"> SMS (critical only)</label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STUDENT DASHBOARD ============ -->
+  <section class="page" id="page-student" data-role="student">
+    <div class="dash-shell">
+      <nav class="sidebar" id="studentNav">
+        <div class="sidebar-title">Student</div>
+      </nav>
+      <div class="dash-content">
+
+        <div class="view active" id="student-overview">
+          <div class="view-head"><div><h2 id="studentGreeting">Your cognitive overview</h2><p>How your focus and rest have trended today.</p></div></div>
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-head"><h3>Cognitive score</h3><span class="tag">today</span></div>
+              <div class="gauge-wrap">
+                <div class="gauge" style="background:conic-gradient(var(--cyan) 0 78%, var(--border) 78% 100%);">
+                  <div class="inner"><div class="num">78</div><div class="sub">/ 100</div></div>
+                </div>
+                <div>
+                  <div style="font-size:13px;color:var(--text-dim);margin-bottom:6px;">Good focus, mild fatigue building since 2pm study block.</div>
+                  <div class="row-flex"><span class="badge ok">Focus 82</span><span class="badge warn">Fatigue 41</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h3>Today's tasks</h3><span class="tag" id="taskTag">2/4</span></div>
+              <div id="taskList"></div>
+              <div class="progress-bar" style="margin-top:10px;"><div class="progress-fill" id="taskProgress" style="width:50%;"></div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Alarm history</h3><span class="tag">last 24h</span></div>
+            <div id="studentAlarms"></div>
+          </div>
+        </div>
+
+        <div class="view" id="student-alarms">
+          <div class="view-head"><div><h2>Alarm settings</h2><p>Tune how sensitive your personal alarms are.</p></div></div>
+          <div class="panel">
+            <label style="font-size:12px;color:var(--text-dim);">Focus-drop sensitivity</label>
+            <input type="range" id="stuSensitivity" min="0" max="100" value="55">
+            <div class="row-flex" style="justify-content:space-between;margin-bottom:16px;"><span style="font-size:11px;color:var(--text-faint);">Fewer alerts</span><span id="stuSensitivityVal" style="font-size:12px;">55%</span><span style="font-size:11px;color:var(--text-faint);">More alerts</span></div>
+            <hr class="sep">
+            <label style="display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:13px;"><input type="checkbox" checked> Sleep deprivation alarm</label>
+            <label style="display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:13px;"><input type="checkbox" checked> Stress spike alarm</label>
+            <label style="display:flex;gap:8px;align-items:center;font-size:13px;"><input type="checkbox"> Posture reminder</label>
+          </div>
+        </div>
+
+        <div class="view" id="student-reminders">
+          <div class="view-head"><div><h2>Reminders</h2><p>Upcoming nudges from your coach and doctor.</p></div></div>
+          <div class="panel">
+            <div class="alarm-item"><span class="dot" style="background:var(--violet);"></span><div class="body"><div class="title">Hydration check-in</div><div class="meta">3:30 PM · from AI assistant</div></div></div>
+            <div class="alarm-item"><span class="dot" style="background:var(--cyan);"></span><div class="body"><div class="title">Evening wind-down routine</div><div class="meta">9:00 PM · recommended by Dr. Rao</div></div></div>
+            <div class="alarm-item"><span class="dot" style="background:var(--amber);"></span><div class="body"><div class="title">Practice session review</div><div class="meta">6:00 PM · from Coach Iyer</div></div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DOCTOR DASHBOARD ============ -->
+  <section class="page" id="page-doctor" data-role="doctor">
+    <div class="dash-shell">
+      <nav class="sidebar" id="doctorNav">
+        <div class="sidebar-title">Doctor</div>
+      </nav>
+      <div class="dash-content">
+
+        <div class="view active" id="doctor-overview">
+          <div class="view-head"><div><h2>Patient cognitive monitoring</h2><p>Select a patient to view metrics and leave a recommendation.</p></div></div>
+          <div class="kpi-grid">
+            <div class="kpi"><div class="k-label">Patients monitored</div><div class="k-value">32</div></div>
+            <div class="kpi"><div class="k-label">High risk</div><div class="k-value" style="color:var(--red);">4</div></div>
+            <div class="kpi"><div class="k-label">Pending review</div><div class="k-value" style="color:var(--amber);">6</div></div>
+            <div class="kpi"><div class="k-label">Stable</div><div class="k-value" style="color:var(--green);">22</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-head"><h3>Patient list</h3><span class="tag">click a row</span></div>
+              <table>
+                <thead><tr><th>Patient</th><th>Risk</th><th>Last alarm</th><th>Trend</th></tr></thead>
+                <tbody id="patientsBody"></tbody>
+              </table>
+            </div>
+            <div class="panel" id="patientDetail">
+              <div class="panel-head"><h3>Patient detail</h3></div>
+              <div class="empty-state">Select a patient from the list to view their cognitive profile.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="view" id="doctor-alerts">
+          <div class="view-head"><div><h2>Alerts needing review</h2><p>Escalations flagged by the AI engine.</p></div></div>
+          <div class="panel">
+            <table>
+              <thead><tr><th>Patient</th><th>Alarm</th><th>Severity</th><th>Time</th><th>Status</th><th></th></tr></thead>
+              <tbody id="doctorAlertsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="view" id="doctor-log">
+          <div class="view-head"><div><h2>Recommendation log</h2><p>Notes you've saved for patients.</p></div></div>
+          <div class="panel" id="recLog">
+            <div class="empty-state">No recommendations saved yet. Add one from a patient's detail panel.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COACH DASHBOARD ============ -->
+  <section class="page" id="page-coach" data-role="coach">
+    <div class="dash-shell">
+      <nav class="sidebar" id="coachNav">
+        <div class="sidebar-title">Coach</div>
+      </nav>
+      <div class="dash-content">
+
+        <div class="view active" id="coach-overview">
+          <div class="view-head"><div><h2>Team alertness overview</h2><p>Fatigue and alertness levels across your roster.</p></div></div>
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-head"><h3>Team alertness score</h3><span class="tag">avg. today</span></div>
+              <div class="mini-bar-wrap" id="coachChart" style="margin-bottom:18px;"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h3>Squad status</h3></div>
+              <div class="row-flex" style="justify-content:space-between;"><span class="badge ok">Ready</span><span>9</span></div>
+              <div class="progress-bar" style="margin-bottom:10px;"><div class="progress-fill" style="width:64%;"></div></div>
+              <div class="row-flex" style="justify-content:space-between;"><span class="badge warn">Fatigued</span><span>4</span></div>
+              <div class="progress-bar" style="margin-bottom:10px;"><div class="progress-fill" style="width:28%;background:var(--amber);"></div></div>
+              <div class="row-flex" style="justify-content:space-between;"><span class="badge crit">At risk</span><span>1</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:8%;background:var(--red);"></div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Athlete roster</h3><span class="tag">click to select</span></div>
+            <table>
+              <thead><tr><th>Athlete</th><th>Alertness</th><th>Fatigue</th><th>Status</th><th></th></tr></thead>
+              <tbody id="athletesBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="view" id="coach-schedule">
+          <div class="view-head"><div><h2>Training schedule</h2><p>Sessions planned this week.</p></div></div>
+          <div class="panel">
+            <div class="alarm-item"><span class="dot" style="background:var(--cyan);"></span><div class="body"><div class="title">Recovery + mobility session</div><div class="meta">Mon 7:00 AM · low intensity recommended (2 athletes fatigued)</div></div></div>
+            <div class="alarm-item"><span class="dot" style="background:var(--violet);"></span><div class="body"><div class="title">Tactical drills</div><div class="meta">Wed 5:00 PM · full squad</div></div></div>
+            <div class="alarm-item"><span class="dot" style="background:var(--amber);"></span><div class="body"><div class="title">Match simulation</div><div class="meta">Sat 9:00 AM · monitor high-risk athletes closely</div></div></div>
+          </div>
+        </div>
+
+        <div class="view" id="coach-log">
+          <div class="view-head"><div><h2>Alerts sent</h2><p>Focus/rest alerts you've sent to athletes.</p></div></div>
+          <div class="panel" id="coachLog">
+            <div class="empty-state">No alerts sent yet. Send one from the athlete roster.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ACCESS DENIED ============ -->
+  <section class="page" id="page-denied">
+    <div class="access-note">
+      <h2>🔒 Sign in required</h2>
+      <p>That dashboard is role-restricted. Please choose your role from the landing page to continue.</p>
+      <button class="btn btn-accent" onclick="location.hash='#/'">Back to landing</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ============================================================
+   CONFIG / DATA
+   ============================================================ */
+const ROLES = {
+  admin:   { label:'Admin',   color:'#9098ff', desc:'Oversee every user, device and alarm on the platform. Manage accounts and system-wide settings.',
+             icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>' },
+  student: { label:'Student',  color:'#5eeacd', desc:'Track your own focus, fatigue and sleep alarms, and manage personal reminders.',
+             icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>' },
+  doctor:  { label:'Doctor',   color:'#ff6b6b', desc:'Monitor patient cognitive health, review escalated alarms and log recommendations.',
+             icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2v4M15 2v4M6 6h12v6a6 6 0 01-12 0V6z"/><path d="M12 14v6M9 20h6"/></svg>' },
+  coach:   { label:'Coach',    color:'#ffb454', desc:'Watch alertness and fatigue across your roster and send focus alerts to athletes.',
+             icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M12 2l-3 3M12 2l3 3"/><circle cx="12" cy="14" r="8"/></svg>' },
+};
+
+const NAVS = {
+  admin:[
+    {id:'overview',label:'Overview',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>'},
+    {id:'users',label:'Manage users',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-4 3-6 7-6s7 2 7 6"/><path d="M17 8a3.5 3.5 0 010 7"/><path d="M22 20c0-3-2-5-4-5.5"/></svg>'},
+    {id:'alerts',label:'All alerts',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a6 6 0 00-6 6v3l-2 4h16l-2-4V8a6 6 0 00-6-6z"/><path d="M9 19a3 3 0 006 0"/></svg>'},
+    {id:'system',label:'System',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1h.1a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>'},
+  ],
+  student:[
+    {id:'overview',label:'Overview',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>'},
+    {id:'alarms',label:'Alarm settings',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a6 6 0 00-6 6v3l-2 4h16l-2-4V8a6 6 0 00-6-6z"/><path d="M9 19a3 3 0 006 0"/></svg>'},
+    {id:'reminders',label:'Reminders',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>'},
+  ],
+  doctor:[
+    {id:'overview',label:'Patients',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-4 3-6 7-6s7 2 7 6"/></svg>'},
+    {id:'alerts',label:'Alerts',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a6 6 0 00-6 6v3l-2 4h16l-2-4V8a6 6 0 00-6-6z"/><path d="M9 19a3 3 0 006 0"/></svg>'},
+    {id:'log',label:'Recommendation log',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>'},
+  ],
+  coach:[
+    {id:'overview',label:'Roster',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-4 3-6 7-6s7 2 7 6"/></svg>'},
+    {id:'schedule',label:'Schedule',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>'},
+    {id:'log',label:'Alerts sent',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>'},
+  ],
+};
+
+let users = [
+  {name:'Ananya Sharma', role:'Student', status:'Active', last:'2 min ago'},
+  {name:'Rohit Verma',   role:'Student', status:'Active', last:'14 min ago'},
+  {name:'Dr. Priya Rao', role:'Doctor',  status:'Active', last:'1 hr ago'},
+  {name:'Coach Vikram Iyer', role:'Coach', status:'Active', last:'3 hr ago'},
+  {name:'Meera Nair',    role:'Student', status:'Idle',   last:'1 day ago'},
+  {name:'Admin Kavya',   role:'Admin',   status:'Active', last:'5 min ago'},
+];
+
+let allAlerts = [
+  {user:'Ananya Sharma', role:'Student', type:'Focus drop',      sev:'warn', time:'09:14 AM', status:'ok'},
+  {user:'Rohit Verma',   role:'Student', type:'Sleep deficit',   sev:'crit', time:'07:40 AM', status:'warn'},
+  {user:'Rahul Menon',   role:'Coach roster', type:'Fatigue spike', sev:'crit', time:'06:55 AM', status:'warn'},
+  {user:'Meera Nair',    role:'Student', type:'Stress spike',    sev:'warn', time:'Yesterday', status:'ok'},
+  {user:'Device #A1102', role:'System',  type:'Sensor offline',  sev:'warn', time:'Yesterday', status:'ok'},
+  {user:'Devika Singh',  role:'Patient', type:'Cognitive decline flag', sev:'crit', time:'2 days ago', status:'warn'},
+];
+
+let patients = [
+  {name:'Devika Singh', risk:'crit', lastAlarm:'Cognitive decline flag', trend:'↓ declining',
+   detail:{focus:44, fatigue:82, sleep:'4.2 hrs avg', notes:'Reports persistent brain fog and poor sleep for 5 days.'}},
+  {name:'Arjun Kapoor', risk:'warn', lastAlarm:'Stress spike', trend:'→ stable',
+   detail:{focus:61, fatigue:58, sleep:'6.1 hrs avg', notes:'Elevated stress around exam period, sleep improving slowly.'}},
+  {name:'Sana Sheikh',  risk:'ok',  lastAlarm:'None in 5 days', trend:'↑ improving',
+   detail:{focus:84, fatigue:22, sleep:'7.6 hrs avg', notes:'Consistent routine, no flags this week.'}},
+  {name:'Karan Malhotra', risk:'warn', lastAlarm:'Sleep deficit', trend:'↓ declining',
+   detail:{focus:58, fatigue:66, sleep:'5.0 hrs avg', notes:'New alarm triggered twice this week around late-night study.'}},
+];
+
+let athletes = [
+  {name:'Rahul Menon',  alert:38, fatigue:81, status:'crit'},
+  {name:'Neha Joshi',   alert:64, fatigue:48, status:'warn'},
+  {name:'Vikas Chauhan',alert:88, fatigue:14, status:'ok'},
+  {name:'Priya Das',    alert:91, fatigue:9,  status:'ok'},
+  {name:'Farhan Ali',   alert:70, fatigue:33, status:'warn'},
+];
+
+let recLog = [];
+let coachLog = [];
+let selectedPatientIdx = null;
+
+/* ============================================================
+   STATE / ROUTING
+   ============================================================ */
+const state = { role:null, name:null, userId:null, email:null };
+
+function badgeClass(sev){ return {crit:'crit', warn:'warn', ok:'ok'}[sev] || 'mut'; }
+function badgeLabel(sev){ return {crit:'Critical', warn:'Warning', ok:'Resolved'}[sev] || sev; }
+
+function showToast(msg, type){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' '+type : '');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3200);
+}
+
+/* ============================================================
+   "DATABASE" LAYER — localStorage-backed users table.
+   Mirrors a real users table (id, name, email, role, salt,
+   passwordHash, iterations, createdAt) so the auth flow below
+   behaves like it's talking to a real backend/DB, even though
+   everything runs client-side for this demo build.
+   ============================================================ */
+const DB_KEY = 'cognialarm_db_v1';
+const SESSION_KEY = 'cognialarm_session_v1';
+const PBKDF2_ITERATIONS = 100000;
+const SESSION_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
+
+function dbLoad(){
+  try{
+    const raw = localStorage.getItem(DB_KEY);
+    return raw ? JSON.parse(raw) : { users: [], nextId: 1 };
+  }catch(e){ return { users: [], nextId: 1 }; }
+}
+function dbSave(db){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+function dbFindByEmail(email){
+  const db = dbLoad();
+  return db.users.find(u => u.email.toLowerCase() === email.toLowerCase()) || null;
+}
+
+function bufToHex(buf){ return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+function randomHex(bytes){ const arr = new Uint8Array(bytes); crypto.getRandomValues(arr); return bufToHex(arr); }
+
+async function hashPassword(password, saltHex, iterations = PBKDF2_ITERATIONS){
+  const enc = new TextEncoder();
+  const salt = new Uint8Array(saltHex.match(/.{1,2}/g).map(h=>parseInt(h,16)));
+  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name:'PBKDF2', salt, iterations, hash:'SHA-256' }, keyMaterial, 256
+  );
+  return bufToHex(bits);
+}
+
+async function dbInsertUser({name, email, password, role}){
+  const db = dbLoad();
+  const salt = randomHex(16);
+  const passwordHash = await hashPassword(password, salt);
+  const user = {
+    id: db.nextId++,
+    name, email, role,
+    salt, passwordHash, iterations: PBKDF2_ITERATIONS,
+    createdAt: new Date().toISOString(),
+  };
+  db.users.push(user);
+  dbSave(db);
+  return user;
+}
+
+async function verifyPassword(user, password){
+  const attemptHash = await hashPassword(password, user.salt, user.iterations);
+  if(attemptHash.length !== user.passwordHash.length) return false;
+  let diff = 0;
+  for(let i=0;i<attemptHash.length;i++){ diff |= attemptHash.charCodeAt(i) ^ user.passwordHash.charCodeAt(i); }
+  return diff === 0;
+}
+
+function seedDemoAccounts(){
+  const db = dbLoad();
+  if(db.users.length > 0) return; // already seeded / real accounts exist
+  const seeds = [
+    { name:'Admin Kavya',       email:'admin@cognialarm.io',   password:'AdminPass123!', role:'admin'   },
+    { name:'Ananya Sharma',     email:'student@cognialarm.io', password:'StudyHard123!', role:'student' },
+    { name:'Dr. Priya Rao',     email:'doctor@cognialarm.io',  password:'CarePlan123!',  role:'doctor'  },
+    { name:'Coach Vikram Iyer', email:'coach@cognialarm.io',   password:'GoTeam123!',    role:'coach'   },
+  ];
+  (async ()=>{ for(const s of seeds){ await dbInsertUser(s); } buildDemoList(); })();
+}
+
+/* ---------- Session management ---------- */
+function createSession(user){
+  const session = {
+    token: randomHex(24),
+    userId: user.id, name: user.name, email: user.email, role: user.role,
+    issuedAt: Date.now(), expiresAt: Date.now() + SESSION_TTL_MS,
+  };
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  return session;
+}
+function readSession(){
+  try{
+    const raw = localStorage.getItem(SESSION_KEY);
+    if(!raw) return null;
+    const s = JSON.parse(raw);
+    if(!s.expiresAt || Date.now() > s.expiresAt){ localStorage.removeItem(SESSION_KEY); return null; }
+    return s;
+  }catch(e){ return null; }
+}
+function clearSession(){ localStorage.removeItem(SESSION_KEY); }
+
+function applySessionToState(session){
+  state.role = session.role;
+  state.name = session.name;
+  state.userId = session.userId;
+  state.email = session.email;
+}
+
+/* ---------- Auth UI helpers ---------- */
+function switchAuthTab(which){
+  document.getElementById('tabLoginBtn').classList.toggle('active', which==='login');
+  document.getElementById('tabSignupBtn').classList.toggle('active', which==='signup');
+  document.getElementById('loginForm').classList.toggle('hidden', which!=='login');
+  document.getElementById('signupForm').classList.toggle('hidden', which!=='signup');
+  hideAuthError('loginError'); hideAuthError('signupError');
+}
+function togglePw(id, btn){
+  const el = document.getElementById(id);
+  const show = el.type === 'password';
+  el.type = show ? 'text' : 'password';
+  btn.textContent = show ? 'HIDE' : 'SHOW';
+}
+function showAuthError(id, msg){ const el = document.getElementById(id); el.textContent = msg; el.classList.add('show'); }
+function hideAuthError(id){ const el = document.getElementById(id); el.classList.remove('show'); el.textContent=''; }
+
+let selectedSignupRole = null;
+function buildRoleSelectGrid(){
+  const grid = document.getElementById('roleSelectGrid');
+  grid.innerHTML = Object.keys(ROLES).map(key=>{
+    const r = ROLES[key];
+    return `<button type="button" class="role-pill" style="--rp:${r.color}" data-role="${key}" onclick="pickSignupRole('${key}')">${r.label}</button>`;
+  }).join('');
+}
+function pickSignupRole(key){
+  selectedSignupRole = key;
+  document.querySelectorAll('#roleSelectGrid .role-pill').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.role === key);
+  });
+}
+
+function buildDemoList(){
+  const db = dbLoad();
+  const list = document.getElementById('demoList');
+  const seedEmails = ['admin@cognialarm.io','student@cognialarm.io','doctor@cognialarm.io','coach@cognialarm.io'];
+  const seedPw = {
+    'admin@cognialarm.io':'AdminPass123!', 'student@cognialarm.io':'StudyHard123!',
+    'doctor@cognialarm.io':'CarePlan123!', 'coach@cognialarm.io':'GoTeam123!',
+  };
+  list.innerHTML = seedEmails.map(email=>{
+    const u = db.users.find(x=>x.email===email);
+    if(!u) return '';
+    const r = ROLES[u.role];
+    return `<div class="demo-row">
+      <div class="who"><span class="dot" style="--dc:${r.color}"></span>
+        <div><div class="lbl">${r.label}</div><div class="sub">${email}</div></div>
+      </div>
+      <button type="button" class="btn btn-sm" onclick="fillDemoLogin('${email}','${seedPw[email]}')">Use</button>
+    </div>`;
+  }).join('');
+}
+function fillDemoLogin(email, password){
+  switchAuthTab('login');
+  document.getElementById('loginEmail').value = email;
+  document.getElementById('loginPassword').value = password;
+  showToast('Demo credentials filled — hit Sign in.', 'ok');
+}
+
+function pwStrengthScore(pw){
+  let score = 0;
+  if(pw.length >= 8) score++;
+  if(/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if(/\d/.test(pw)) score++;
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+  return score;
+}
+document.getElementById('signupPassword').addEventListener('input', (e)=>{
+  const score = pwStrengthScore(e.target.value);
+  const bars = document.querySelectorAll('#pwStrength span');
+  const colors = ['var(--red)','var(--amber)','var(--cyan)','var(--green)'];
+  bars.forEach((b,i)=>{ b.style.background = i < score ? colors[score-1] : 'var(--border)'; });
+});
+
+/* ---------- Login / signup / logout handlers ---------- */
+async function handleLogin(evt){
+  evt.preventDefault();
+  hideAuthError('loginError');
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginSubmitBtn');
+
+  if(!email || !password){ showAuthError('loginError', 'Enter your email and password.'); return false; }
+
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try{
+    const user = dbFindByEmail(email);
+    if(!user){ showAuthError('loginError', 'No account found with that email.'); return false; }
+    const ok = await verifyPassword(user, password);
+    if(!ok){ showAuthError('loginError', 'Incorrect password.'); return false; }
+
+    const session = createSession(user);
+    applySessionToState(session);
+    showToast(`Welcome back, ${user.name.split(' ')[0]}.`, 'ok');
+    location.hash = '#/' + user.role;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign in';
+  }
+  return false;
+}
+
+async function handleSignup(evt){
+  evt.preventDefault();
+  hideAuthError('signupError');
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const confirm = document.getElementById('signupConfirm').value;
+  const btn = document.getElementById('signupSubmitBtn');
+
+  if(!name || !email || !password || !confirm){ showAuthError('signupError', 'Fill in every field.'); return false; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showAuthError('signupError', 'Enter a valid email address.'); return false; }
+  if(password.length < 8){ showAuthError('signupError', 'Password must be at least 8 characters.'); return false; }
+  if(password !== confirm){ showAuthError('signupError', 'Passwords do not match.'); return false; }
+  if(!selectedSignupRole){ showAuthError('signupError', 'Choose an account role.'); return false; }
+  if(dbFindByEmail(email)){ showAuthError('signupError', 'An account with that email already exists.'); return false; }
+
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  try{
+    const user = await dbInsertUser({ name, email, password, role: selectedSignupRole });
+    users.unshift({ name: user.name, role: ROLES[user.role].label, status:'Active', last:'just now' });
+    const session = createSession(user);
+    applySessionToState(session);
+    showToast(`Account created — welcome, ${user.name.split(' ')[0]}.`, 'ok');
+    location.hash = '#/' + user.role;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create account';
+  }
+  return false;
+}
+
+function logout(){
+  clearSession();
+  state.role = null; state.name = null; state.userId = null; state.email = null;
+  location.hash = '#/';
+  showToast('Signed out.', 'ok');
+}
+document.getElementById('logoutBtn').addEventListener('click', logout);
+
+function route(){
+  const hash = (location.hash || '#/').replace('#','').replace(/^\//,'') || '';
+  const parts = hash.split('/').filter(Boolean); // e.g. ['admin']
+  const requestedRole = parts[0];
+
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const topbar = document.getElementById('topbar');
+
+  if(!requestedRole){
+    document.getElementById('page-landing').classList.add('active');
+    topbar.classList.remove('show');
+    return;
+  }
+
+  if(!ROLES[requestedRole]){
+    document.getElementById('page-denied').classList.add('active');
+    topbar.classList.remove('show');
+    return;
+  }
+
+  // role-based access guard: only allow if logged-in role matches requested role
+  if(state.role !== requestedRole){
+    document.getElementById('page-denied').classList.add('active');
+    topbar.classList.remove('show');
+    showToast('Please sign in as ' + ROLES[requestedRole].label + ' to view that dashboard.', 'crit');
+    return;
+  }
+
+  // authorized
+  const pageEl = document.getElementById('page-' + requestedRole);
+  pageEl.classList.add('active');
+  topbar.classList.add('show');
+  document.documentElement.style.setProperty('--role-color', ROLES[requestedRole].color);
+  document.getElementById('topbarAvatar').textContent = (state.name||'?').trim()[0].toUpperCase();
+  document.getElementById('topbarAvatar').style.background = ROLES[requestedRole].color;
+  document.getElementById('topbarName').textContent = state.name;
+  document.getElementById('topbarRole').textContent = ROLES[requestedRole].label + ' access';
+  document.getElementById('topbarRole').style.color = ROLES[requestedRole].color;
+
+  if(requestedRole === 'student'){
+    document.getElementById('studentGreeting').textContent = 'Welcome back, ' + state.name.split(' ')[0] + '.';
+  }
+}
+window.addEventListener('hashchange', route);
+
+/* ============================================================
+   SIDEBAR NAV BUILD + VIEW SWITCHING
+   ============================================================ */
+function buildSidebars(){
+  Object.keys(NAVS).forEach(role=>{
+    const nav = document.getElementById(role+'Nav');
+    NAVS[role].forEach((item,i)=>{
+      const btn = document.createElement('div');
+      btn.className = 'nav-item' + (i===0 ? ' active':'');
+      btn.innerHTML = item.icon + '<span>'+item.label+'</span>';
+      btn.addEventListener('click', ()=>switchView(role, item.id, btn));
+      nav.appendChild(btn);
+    });
+  });
+}
+function switchView(role, viewId, btnEl){
+  document.querySelectorAll('#'+role+'Nav .nav-item').forEach(n=>n.classList.remove('active'));
+  btnEl.classList.add('active');
+  document.querySelectorAll('#page-'+role+' .view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(role+'-'+viewId).classList.add('active');
+}
+
+/* ============================================================
+   WAVEFORM (signature element on landing)
+   ============================================================ */
+(function initWave(){
+  const canvas = document.getElementById('waveCanvas');
+  const ctx = canvas.getContext('2d');
+  let t = 0;
+  function resize(){
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function draw(){
+    const w = canvas.getBoundingClientRect().width;
+    const h = canvas.getBoundingClientRect().height;
+    ctx.clearRect(0,0,w,h);
+    // grid
+    ctx.strokeStyle = 'rgba(255,255,255,.04)';
+    ctx.lineWidth = 1;
+    for(let x=0;x<w;x+=30){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+    for(let y=0;y<h;y+=25){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+    // cognitive signal wave (cyan)
+    ctx.beginPath();
+    for(let x=0;x<=w;x+=2){
+      const y = h/2 + Math.sin(x*0.03 + t)*14 + Math.sin(x*0.008 + t*0.5)*10;
+      x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle = '#5eeacd';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = 'rgba(94,234,205,.6)';
+    ctx.shadowBlur = 6;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // occasional alarm spike (violet)
+    ctx.beginPath();
+    for(let x=0;x<=w;x+=2){
+      const spike = (Math.sin(x*0.02 - t*1.3) > 0.97) ? 30*Math.random() : 0;
+      const y = h/2 + Math.sin(x*0.05 - t*0.8)*6 - spike;
+      x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle = 'rgba(144,152,255,.55)';
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+
+    t += 0.035;
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  function tick(){
+    document.getElementById('wvFocus').textContent = (70 + Math.round(Math.sin(Date.now()/2000)*8)) ;
+    document.getElementById('wvFatigue').textContent = (30 + Math.round(Math.cos(Date.now()/2500)*10));
+    document.getElementById('wvAlarms').textContent = (2 + Math.round(Math.abs(Math.sin(Date.now()/4000))*4));
+  }
+  tick();
+  setInterval(tick, 1800);
+})();
+
+/* ============================================================
+   MINI BAR CHARTS (admin / coach) — built with plain divs
+   ============================================================ */
+function renderMiniBars(containerId, data){
+  const el = document.getElementById(containerId);
+  const max = Math.max(...data.map(d=>d.v));
+  el.innerHTML = data.map(d=>{
+    const pct = Math.max(6, Math.round((d.v/max)*100));
+    return `<div class="mini-bar" style="height:${pct}%;"><span class="lbl">${d.l}</span></div>`;
+  }).join('');
+  el.style.marginBottom = '22px';
+}
+
+/* ============================================================
+   ADMIN VIEW RENDERING
+   ============================================================ */
+function renderAdminOverviewAlerts(){
+  const body = document.getElementById('admAlertsBody');
+  body.innerHTML = allAlerts.slice(0,6).map((a,i)=>`
+    <tr>
+      <td>${a.user}</td><td>${a.role}</td><td>${a.type}</td>
+      <td><span class="badge ${badgeClass(a.sev)}">${badgeLabel(a.sev)}</span></td>
+      <td>${a.time}</td>
+      <td><span class="badge ${a.status==='ok'?'ok':'warn'}">${a.status==='ok'?'Resolved':'Open'}</span></td>
+      <td><button class="btn btn-sm" onclick="resolveAlert(${i})">Mark resolved</button></td>
+    </tr>`).join('');
+  document.getElementById('admCritCount').textContent = allAlerts.filter(a=>a.sev==='crit' && a.status!=='ok').length;
+  document.getElementById('admActiveAlarms').textContent = allAlerts.filter(a=>a.status!=='ok').length;
+}
+function resolveAlert(i){
+  allAlerts[i].status = 'ok';
+  renderAdminOverviewAlerts();
+  renderAdminAllAlerts();
+  showToast('Alert marked resolved.', 'ok');
+}
+let admAlertFilterState = 'all';
+function renderAdminAllAlerts(){
+  const body = document.getElementById('admAllAlertsBody');
+  let list = allAlerts;
+  if(admAlertFilterState !== 'all'){
+    list = allAlerts.filter(a => admAlertFilterState==='ok' ? a.status==='ok' : (a.sev===admAlertFilterState && a.status!=='ok'));
+  }
+  body.innerHTML = list.length ? list.map((a)=>{
+    const idx = allAlerts.indexOf(a);
+    return `<tr>
+      <td>${a.user}</td><td>${a.role}</td><td>${a.type}</td>
+      <td><span class="badge ${badgeClass(a.sev)}">${badgeLabel(a.sev)}</span></td>
+      <td>${a.time}</td>
+      <td><span class="badge ${a.status==='ok'?'ok':'warn'}">${a.status==='ok'?'Resolved':'Open'}</span></td>
+      <td>${a.status==='ok' ? '' : `<button class="btn btn-sm" onclick="resolveAlert(${idx})">Mark resolved</button>`}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="7"><div class="empty-state">No alerts match this filter.</div></td></tr>`;
+}
+document.getElementById('admAlertFilter').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  document.querySelectorAll('#admAlertFilter button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  admAlertFilterState = btn.dataset.f;
+  renderAdminAllAlerts();
+});
+
+function renderUsers(filter){
+  const body = document.getElementById('usersBody');
+  const f = (filter||'').toLowerCase();
+  const list = users.filter(u => u.name.toLowerCase().includes(f) || u.role.toLowerCase().includes(f));
+  body.innerHTML = list.length ? list.map((u)=>{
+    const idx = users.indexOf(u);
+    return `<tr>
+      <td>${u.name}</td>
+      <td><span class="badge info">${u.role}</span></td>
+      <td><span class="badge ${u.status==='Active'?'ok':'mut'}">${u.status}</span></td>
+      <td>${u.last}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="removeUser(${idx})">Remove</button></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="5"><div class="empty-state">No users match "${filter}".</div></td></tr>`;
+}
+function removeUser(idx){
+  const u = users[idx];
+  users.splice(idx,1);
+  renderUsers(document.getElementById('userSearch').value);
+  showToast(`Removed ${u.name}.`, 'crit');
+}
+document.getElementById('userSearch').addEventListener('input', (e)=>renderUsers(e.target.value));
+document.getElementById('addUserBtn').addEventListener('click', ()=>{
+  const nameEl = document.getElementById('newUserName');
+  const roleEl = document.getElementById('newUserRole');
+  const name = nameEl.value.trim();
+  if(!name){ showToast('Enter a name first.', 'crit'); return; }
+  users.unshift({name, role:roleEl.value, status:'Active', last:'just now'});
+  nameEl.value='';
+  renderUsers(document.getElementById('userSearch').value);
+  showToast(`Added ${name} as ${roleEl.value}.`, 'ok');
+});
+
+const sysSens = document.getElementById('sysSensitivity');
+sysSens.addEventListener('input', ()=>{ document.getElementById('sysSensitivityVal').textContent = sysSens.value+'%'; });
+
+/* ============================================================
+   STUDENT VIEW RENDERING
+   ============================================================ */
+let tasks = [
+  {text:'Complete focus check-in', done:true, time:'8:00 AM'},
+  {text:'30-min study block review', done:true, time:'11:00 AM'},
+  {text:'Take a 10-min screen break', done:false, time:'3:30 PM'},
+  {text:'Log sleep hours for last night', done:false, time:'9:00 PM'},
+];
+let studentAlarms = [
+  {title:'Focus drop detected', meta:'During afternoon study block · 2:14 PM', color:'var(--amber)'},
+  {title:'Stress spike detected', meta:'Before exam review · 10:05 AM', color:'var(--red)'},
+  {title:'Good rest streak — 3 days', meta:'Positive signal · this morning', color:'var(--green)'},
+];
+function renderTasks(){
+  const list = document.getElementById('taskList');
+  list.innerHTML = tasks.map((t,i)=>`
+    <div class="checklist-item ${t.done?'done':''}">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${i})">
+      <span class="cl-text">${t.text}</span>
+      <span class="cl-time">${t.time}</span>
+    </div>`).join('');
+  const doneCount = tasks.filter(t=>t.done).length;
+  document.getElementById('taskTag').textContent = `${doneCount}/${tasks.length}`;
+  document.getElementById('taskProgress').style.width = Math.round(doneCount/tasks.length*100)+'%';
+}
+function toggleTask(i){ tasks[i].done = !tasks[i].done; renderTasks(); }
+
+function renderStudentAlarms(){
+  const wrap = document.getElementById('studentAlarms');
+  wrap.innerHTML = studentAlarms.length ? studentAlarms.map((a,i)=>`
+    <div class="alarm-item">
+      <span class="dot" style="background:${a.color};"></span>
+      <div class="body"><div class="title">${a.title}</div><div class="meta">${a.meta}</div></div>
+      <button class="btn btn-sm" onclick="dismissAlarm(${i})">Dismiss</button>
+    </div>`).join('') : `<div class="empty-state">No alarms — you're all clear.</div>`;
+}
+function dismissAlarm(i){ studentAlarms.splice(i,1); renderStudentAlarms(); showToast('Alarm dismissed.', 'ok'); }
+
+const stuSens = document.getElementById('stuSensitivity');
+stuSens.addEventListener('input', ()=>{ document.getElementById('stuSensitivityVal').textContent = stuSens.value+'%'; });
+
+/* ============================================================
+   DOCTOR VIEW RENDERING
+   ============================================================ */
+function renderPatients(){
+  const body = document.getElementById('patientsBody');
+  body.innerHTML = patients.map((p,i)=>`
+    <tr class="patient-row ${selectedPatientIdx===i?'selected':''}" onclick="selectPatient(${i})">
+      <td>${p.name}</td>
+      <td><span class="badge ${badgeClass(p.risk)}">${p.risk==='crit'?'High':p.risk==='warn'?'Moderate':'Low'}</span></td>
+      <td>${p.lastAlarm}</td>
+      <td>${p.trend}</td>
+    </tr>`).join('');
+}
+function selectPatient(i){
+  selectedPatientIdx = i;
+  renderPatients();
+  const p = patients[i];
+  const panel = document.getElementById('patientDetail');
+  panel.innerHTML = `
+    <div class="panel-head"><h3>${p.name}</h3><span class="badge ${badgeClass(p.risk)}">${p.risk==='crit'?'High risk':p.risk==='warn'?'Moderate risk':'Low risk'}</span></div>
+    <div class="row-flex" style="gap:18px;margin-bottom:14px;">
+      <div><div class="k-value" style="font-size:20px;">${p.detail.focus}</div><div class="k-label">Focus idx</div></div>
+      <div><div class="k-value" style="font-size:20px;color:var(--amber);">${p.detail.fatigue}</div><div class="k-label">Fatigue idx</div></div>
+      <div><div class="k-value" style="font-size:14px;">${p.detail.sleep}</div><div class="k-label">Sleep</div></div>
+    </div>
+    <p style="font-size:12.5px;color:var(--text-dim);line-height:1.6;">${p.detail.notes}</p>
+    <hr class="sep">
+    <label style="font-size:12px;color:var(--text-dim);">Add recommendation</label>
+    <textarea id="recText" placeholder="e.g. Recommend earlier bedtime and reduced screen time after 9pm..."></textarea>
+    <div style="margin-top:8px;"><button class="btn btn-accent btn-sm" onclick="saveRecommendation(${i})">Save recommendation</button></div>
+  `;
+}
+function saveRecommendation(i){
+  const text = document.getElementById('recText').value.trim();
+  if(!text){ showToast('Write a recommendation first.', 'crit'); return; }
+  const p = patients[i];
+  recLog.unshift({patient:p.name, text, time:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});
+  renderRecLog();
+  showToast(`Recommendation saved for ${p.name}.`, 'ok');
+  selectPatient(i);
+}
+function renderRecLog(){
+  const el = document.getElementById('recLog');
+  el.innerHTML = recLog.length ? recLog.map(r=>`
+    <div class="log-entry"><b>${r.patient}</b> · ${r.time}<br>${r.text}</div>
+  `).join('') : `<div class="empty-state">No recommendations saved yet. Add one from a patient's detail panel.</div>`;
+}
+function renderDoctorAlerts(){
+  const body = document.getElementById('doctorAlertsBody');
+  const list = allAlerts.filter(a=>a.role==='Patient' || a.role==='Student');
+  body.innerHTML = list.map((a)=>{
+    const idx = allAlerts.indexOf(a);
+    return `<tr>
+      <td>${a.user}</td><td>${a.type}</td>
+      <td><span class="badge ${badgeClass(a.sev)}">${badgeLabel(a.sev)}</span></td>
+      <td>${a.time}</td>
+      <td><span class="badge ${a.status==='ok'?'ok':'warn'}">${a.status==='ok'?'Resolved':'Open'}</span></td>
+      <td>${a.status==='ok' ? '' : `<button class="btn btn-sm" onclick="resolveAlert(${idx})">Mark resolved</button>`}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ============================================================
+   COACH VIEW RENDERING
+   ============================================================ */
+function renderAthletes(){
+  const body = document.getElementById('athletesBody');
+  body.innerHTML = athletes.map((a,i)=>`
+    <tr>
+      <td>${a.name}</td>
+      <td>${a.alert}</td>
+      <td>${a.fatigue}</td>
+      <td><span class="badge ${badgeClass(a.status)}">${a.status==='crit'?'At risk':a.status==='warn'?'Fatigued':'Ready'}</span></td>
+      <td><button class="btn btn-sm" onclick="sendFocusAlert(${i})">Send focus alert</button></td>
+    </tr>`).join('');
+}
+function sendFocusAlert(i){
+  const a = athletes[i];
+  coachLog.unshift({athlete:a.name, time:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}), msg:'Focus/rest alert sent — recommended recovery break.'});
+  renderCoachLog();
+  showToast(`Focus alert sent to ${a.name}.`, 'ok');
+}
+function renderCoachLog(){
+  const el = document.getElementById('coachLog');
+  el.innerHTML = coachLog.length ? coachLog.map(c=>`
+    <div class="log-entry"><b>${c.athlete}</b> · ${c.time}<br>${c.msg}</div>
+  `).join('') : `<div class="empty-state">No alerts sent yet. Send one from the athlete roster.</div>`;
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function initAll(){
+  buildRoleGrid();
+  buildSidebars();
+
+  renderAdminOverviewAlerts();
+  renderAdminAllAlerts();
+  renderUsers('');
+  renderMiniBars('adminChart', [
+    {l:'Mon',v:18},{l:'Tue',v:22},{l:'Wed',v:14},{l:'Thu',v:27},{l:'Fri',v:20},{l:'Sat',v:9},{l:'Sun',v:12}
+  ]);
+
+  renderTasks();
+  renderStudentAlarms();
+
+  renderPatients();
+  renderDoctorAlerts();
+  renderRecLog();
+
+  renderAthletes();
+  renderCoachLog();
+  renderMiniBars('coachChart', athletes.map(a=>({l:a.name.split(' ')[0], v:a.alert})));
+
+  route();
+}
+initAll();
+</script>
+</body>
+</html>

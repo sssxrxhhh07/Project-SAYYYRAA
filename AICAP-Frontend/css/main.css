@@ -1,0 +1,308 @@
+/* ============================================================
+   main.css — Design Tokens, Typography, Reset & Layout Grid
+   Sketch Design System (hand-drawn notebook aesthetic)
+   ============================================================
+   Sourced from: Sketch-Design.md spec.
+   Every color/spacing/radius/shadow value used anywhere in the
+   app must come from a token defined here — no raw hex/px values
+   in components.css or inline styles.
+   ============================================================ */
+
+/* ---------- Fonts ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Delicious+Handrawn&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* ---------- Core palette ---------- */
+  --primary: #1DAD97;       /* teal — actions, focus, selection */
+  --secondary: #F4EDE0;     /* warm cream paper */
+  --success: #16A34A;
+  --warning: #D97706;
+  --danger: #DC2626;
+  --surface: #FFFFFF;
+  --text: #111827;
+
+  /* ---------- Semantic aliases (use these, not the raw palette above) ---------- */
+  --paper: #F4EDE0;
+  --paper-soft: #EFE4D3;
+  --paper-card: #FFFFFF;
+  --ink: #111827;
+  --graphite: rgba(17, 24, 39, 0.72);
+  --graphite-soft: rgba(17, 24, 39, 0.28);
+  --teal: #1DAD97;
+  --teal-soft: rgba(29, 173, 151, 0.14);
+  --pencil-shadow: rgba(17, 24, 39, 0.18);
+  --focus-ring: #1DAD97;
+
+  /* Text-on-teal: Delicious Handrawn is thin/expressive, so verified dark
+     text reads more reliably on a solid teal fill than white at small sizes. */
+  --on-teal: #0B2D27;
+
+  /* ---------- Lines ---------- */
+  --line-solid: 2px solid var(--ink);
+  --line-dashed: 2px dashed var(--graphite);
+  --line-soft: 1px solid var(--graphite-soft);
+
+  /* ---------- Radius ---------- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  /* ---------- Chunky pencil shadows (no blur, flat offset) ---------- */
+  --pencil-shadow-sm: 3px 3px 0 var(--pencil-shadow);
+  --pencil-shadow-md: 6px 6px 0 var(--pencil-shadow);
+  --pencil-shadow-lg: 9px 9px 0 var(--pencil-shadow);
+
+  /* ---------- Spacing (4px base scale) ---------- */
+  --space-05: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-18: 72px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ---------- Typography ---------- */
+  --font-primary: "Delicious Handrawn", cursive;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Fluid typography using clamp() */
+  --text-xs: clamp(0.75rem, 0.875rem, 1rem);     /* 12px - 14px - 16px */
+  --text-sm: clamp(0.875rem, 1rem, 1.125rem);      /* 14px - 16px - 18px */
+  --text-md: clamp(1rem, 1.125rem, 1.25rem);       /* 16px - 18px - 20px */
+  --text-lg: clamp(1.125rem, 1.25rem, 1.5rem);     /* 18px - 20px - 24px */
+  --text-xl: clamp(1.25rem, 1.5rem, 1.75rem);      /* 20px - 24px - 28px */
+  --text-2xl: clamp(1.5rem, 2rem, 2.5rem);         /* 24px - 32px - 40px */
+
+  /* ---------- Z-index layers ---------- */
+  --z-base: 0;
+  --z-nav: 10;
+  --z-dropdown: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+
+  /* ---------- Motion (respects prefers-reduced-motion, see bottom of file) ---------- */
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+}
+
+/* ============================================================
+   Reset
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-primary);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: var(--teal);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--ink);
+}
+
+/* Global focus-visible — unmistakable, per accessibility rules.
+   Never removed; only re-shaped per-component (e.g. cards swap
+   dashed -> solid outline instead of relying on this ring alone). */
+:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* ============================================================
+   Typography scale
+   ============================================================ */
+
+h1, h2, h3, h4 {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 var(--space-3);
+  color: var(--ink);
+}
+
+h1 { font-size: var(--text-2xl); font-weight: 800; }
+h2 { font-size: var(--text-xl); font-weight: 700; }
+h3 { font-size: var(--text-lg); font-weight: 600; }
+h4 { font-size: var(--text-md); font-weight: 600; }
+
+p {
+  margin: 0 0 var(--space-3);
+  color: var(--text);
+}
+
+.text-xs { font-size: var(--text-xs); }
+.text-sm { font-size: var(--text-sm); }
+.text-md { font-size: var(--text-md); }
+.text-lg { font-size: var(--text-lg); }
+
+.text-muted { color: var(--graphite); }
+.text-mono { font-family: var(--font-mono); }
+
+.hidden { display: none !important; }
+
+/* The `hidden` attribute loses to any class that sets display:flex/grid
+   at equal specificity (e.g. .topbar, .modal-overlay, .row-flex) since
+   author CSS always wins over the UA stylesheet. Force it explicitly. */
+[hidden] { display: none !important; }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--teal);
+  font-weight: 600;
+}
+
+/* ============================================================
+   Layout grid
+   ============================================================ */
+
+.container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page {
+  display: none;
+  flex: 1;
+}
+
+.page.active {
+  display: block;
+}
+
+/* Sidebar-routed sub-views inside a role dashboard (toggled by main.js) */
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+.dash-shell {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  gap: var(--space-6);
+  align-items: start;
+  padding: var(--space-6) var(--space-6) var(--space-8);
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.dash-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.row-flex {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+
+@media (max-width: 53.75rem) {
+  .dash-shell {
+    grid-template-columns: 1fr;
+    padding: var(--space-4);
+  }
+  .grid-2, .grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Motion accessibility — respected globally
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AICAP — Your Cognitive Alarm Sketchbook</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Audio element for alarm sound -->
+  <audio id="alarmAudio" src="audio/default-alarm.wav" preload="auto" loop></audio>
+
+  <!-- Toast notifications -->
+  <div id="toastRegion" class="toast-region" aria-live="polite"></div>
+
+  <!-- Topbar: hidden until signed in -->
+  <header id="topbar" class="topbar" hidden>
+    <div class="brand">
+      <span aria-hidden="true">✏️</span> AICAP
+    </div>
+    <div class="user-chip">
+      <div class="avatar" id="topbarAvatar" aria-hidden="true">?</div>
+      <div>
+        <div id="topbarName" class="text-sm" style="font-weight:700;">—</div>
+        <div id="topbarRole" class="text-xs text-muted">—</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============================================================
+         LANDING + AUTH
+         ============================================================ -->
+    <section id="page-landing" class="page active">
+      <div class="container" style="padding-top:var(--space-8);padding-bottom:var(--space-8);">
+
+        <div class="grid-2" style="align-items:center;">
+
+          <!-- Hero -->
+          <div class="stack gap-4">
+            <span class="eyebrow" aria-hidden="true">✎ Smart Adaptive Alarms</span>
+            <h1 style="font-size:var(--text-2xl);">Wake up on your terms.</h1>
+            <p class="text-md text-muted">
+              AICAP learns how you actually wake up — then quietly adjusts your alarm so mornings stop fighting you.
+            </p>
+            <div class="callout callout-tip" role="note">
+              <span aria-hidden="true">💡</span>
+              <span>Sign in to manage your alarms, or create a free account below.</span>
+            </div>
+          </div>
+
+          <!-- Auth card -->
+          <div class="card card-sketch">
+            <div class="pill-tabs" role="tablist" aria-label="Authentication">
+              <button type="button" id="tabLoginBtn" class="pill-tab active" role="tab" aria-selected="true">Log in</button>
+              <button type="button" id="tabSignupBtn" class="pill-tab" role="tab" aria-selected="false">Sign up</button>
+            </div>
+
+            <!-- Login form -->
+            <form id="loginForm" class="stack" style="margin-top:var(--space-6);">
+              <h2 style="margin:0 0 var(--space-4);">Welcome back</h2>
+              <div id="loginError" class="field-error" hidden></div>
+
+              <div class="field-group">
+                <label class="field-label" for="loginEmail">Email</label>
+                <input class="input" type="email" id="loginEmail" name="email" required autocomplete="email">
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="loginPassword">Password</label>
+                <div class="field-inline">
+                  <input class="input" type="password" id="loginPassword" name="password" required autocomplete="current-password">
+                  <button type="button" class="field-inline-action" onclick="togglePw('loginPassword', this)">Show</button>
+                </div>
+              </div>
+
+              <button type="submit" id="loginSubmitBtn" class="btn btn-primary" style="width:100%;">Log in</button>
+              
+              <div style="text-align:center; margin:var(--space-3) 0;">
+                <span class="text-muted text-sm">or</span>
+              </div>
+              
+              <button type="button" class="btn btn-secondary" style="width:100%;" onclick="initiateGoogleLogin()">
+                Continue with Google
+              </button>
+              
+              <div style="text-align:center; margin-top:var(--space-4);">
+                <button type="button" class="btn btn-tertiary btn-sm" onclick="skipForTesting()">
+                  Skip for testing
+                </button>
+              </div>
+              
+              <div style="text-align:center; margin-top:var(--space-4);">
+                <span class="text-sm">New here? </span>
+                <a href="#" onclick="switchAuthTab('signup');return false;" style="font-weight:600;">Create an account</a>
+              </div>
+            </form>
+
+            <!-- Signup form -->
+            <form id="signupForm" class="stack hidden" style="margin-top:var(--space-6);">
+              <h2 style="margin:0 0 var(--space-4);">Set your first alarm in two minutes</h2>
+              <div id="signupError" class="field-error" hidden></div>
+
+              <div class="field-group">
+                <label class="field-label" for="signupName">Name</label>
+                <input class="input" type="text" id="signupName" name="name" required autocomplete="name">
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="signupEmail">Email</label>
+                <input class="input" type="email" id="signupEmail" name="email" required autocomplete="email">
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="signupPassword">Password</label>
+                <div class="field-inline">
+                  <input class="input" type="password" id="signupPassword" name="password" required minlength="8" autocomplete="new-password">
+                  <button type="button" class="field-inline-action" onclick="togglePw('signupPassword', this)">Show</button>
+                </div>
+                <div class="pw-strength row-flex gap-1" aria-hidden="true">
+                  <span style="height:var(--space-1);flex:1;border-radius:var(--radius-pill);background:var(--graphite-soft);"></span>
+                  <span style="height:var(--space-1);flex:1;border-radius:var(--radius-pill);background:var(--graphite-soft);"></span>
+                  <span style="height:var(--space-1);flex:1;border-radius:var(--radius-pill);background:var(--graphite-soft);"></span>
+                  <span style="height:var(--space-1);flex:1;border-radius:var(--radius-pill);background:var(--graphite-soft);"></span>
+                </div>
+                <span class="field-help">At least 8 characters</span>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="signupConfirm">Confirm password</label>
+                <input class="input" type="password" id="signupConfirm" name="confirm" required autocomplete="new-password">
+              </div>
+
+              <div class="field-group">
+                <span class="field-label">How will you use AICAP?</span>
+                <div class="grid-2" id="roleSelectGrid"></div>
+              </div>
+
+              <button type="submit" id="signupSubmitBtn" class="btn btn-primary" style="width:100%;">Create account</button>
+              
+              <div style="text-align:center; margin:var(--space-3) 0;">
+                <span class="text-muted text-sm">or</span>
+              </div>
+              
+              <button type="button" class="btn btn-secondary" style="width:100%;" onclick="initiateGoogleLogin()">
+                Sign up with Google
+              </button>
+              
+              <div style="text-align:center; margin-top:var(--space-4);">
+                <span class="text-sm">Already have an account? </span>
+                <a href="#" onclick="switchAuthTab('login');return false;" style="font-weight:600;">Log in</a>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         USER DASHBOARD — auth, profile, and alarms are the only
+         real backend-powered surfaces here.
+         ============================================================ -->
+    <section id="page-user" class="page">
+      <div class="dash-shell">
+        <nav id="user_nav" class="sidebar" aria-label="User navigation"></nav>
+
+        <div class="dash-content">
+
+          <div id="user-alarms" class="view">
+            <p class="text-muted" id="userGreeting" style="margin-bottom:var(--space-4);">Morning starts here.</p>
+            <div class="row-flex" style="justify-content:space-between;margin-bottom:var(--space-4);">
+              <h2 style="margin:0;">Alarms</h2>
+              <button class="btn btn-primary" type="button" onclick="openAlarmModal()">+ Add alarm</button>
+            </div>
+            <div id="nextAlarmBanner" class="card card-selected row-flex" style="justify-content:space-between;margin-bottom:var(--space-6);" hidden></div>
+            <div id="alarmsContainer" class="stack gap-4"></div>
+          </div>
+
+          <div id="user-today" class="view">
+            <h2>Today</h2>
+            <p class="text-muted">Alarms scheduled to fire today.</p>
+            <div id="todayAlarmsContainer" class="stack gap-4"></div>
+          </div>
+
+          <div id="user-upcoming" class="view">
+            <h2>Upcoming</h2>
+            <p class="text-muted">Everything on your schedule from tomorrow onward.</p>
+            <div id="upcomingAlarmsContainer" class="stack gap-4"></div>
+          </div>
+
+          <div id="user-profile" class="view">
+            <h2>About you</h2>
+            <form id="profileForm-user" class="profile-form card" data-suffix="user">
+              <div class="row-flex gap-2" style="margin-bottom:var(--space-4);">
+                <span class="badge badge-type" id="profileRoleBadge-user">USER</span>
+                <span class="badge badge-active" id="profileProviderBadge-user">LOCAL</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profileName-user">Name</label>
+                <input class="input" type="text" id="profileName-user" name="name">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profileEmail-user">Email</label>
+                <input class="input" type="email" id="profileEmail-user" name="email" disabled>
+                <span class="field-help">Your email is your sign-in ID and can't be changed here.</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profilePhone-user">Phone</label>
+                <input class="input" type="tel" id="profilePhone-user" name="phone">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profileBio-user">Bio</label>
+                <textarea class="input textarea" id="profileBio-user" name="bio" rows="3"></textarea>
+              </div>
+              <button type="submit" id="profileSaveBtn-user" class="btn btn-primary">Save changes</button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         WELLNESS COACH DASHBOARD
+         Overview uses real roster stats (GET /api/wellness/dashboard).
+         Alarm Manager is the coach's own personal alarm list — the
+         same feature as the USER dashboard, rendered into its own
+         container id so the two dashboards never collide.
+         ============================================================ -->
+    <section id="page-coach" class="page">
+      <div class="dash-shell">
+        <nav id="wellness_coach_nav" class="sidebar" aria-label="Coach navigation"></nav>
+
+        <div class="dash-content">
+
+          <div id="wellness_coach-overview" class="view">
+            <p class="text-muted" id="coachGreeting" style="margin-bottom:var(--space-4);">Your circle's mornings, at a glance.</p>
+            <h2>Overview</h2>
+            <p class="text-muted">A snapshot of the users AICAP currently supports.</p>
+            <div class="grid-3">
+              <div class="stat-card">
+                <span class="stat-card-label">Users on the platform</span>
+                <span class="stat-card-value accent" id="stat-roster-users">—</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card-label">Total alarms set</span>
+                <span class="stat-card-value" id="stat-roster-alarms">—</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card-label">Currently active</span>
+                <span class="stat-card-value" id="stat-roster-active">—</span>
+              </div>
+            </div>
+            <div class="callout" style="margin-top:var(--space-6);">
+              <span aria-hidden="true">🌱</span>
+              <span>Per-coachee assignment is coming in a later phase — these figures reflect all USER accounts platform-wide for now.</span>
+            </div>
+          </div>
+
+          <div id="wellness_coach-alarms" class="view">
+            <div class="row-flex" style="justify-content:space-between;margin-bottom:var(--space-4);">
+              <h2 style="margin:0;">Alarm Manager</h2>
+              <button class="btn btn-primary" type="button" onclick="openAlarmModal()">+ Add alarm</button>
+            </div>
+            <div id="coachAlarmsContainer" class="stack gap-4"></div>
+          </div>
+
+          <div id="wellness_coach-profile" class="view">
+            <h2>About you</h2>
+            <form id="profileForm-coach" class="profile-form card" data-suffix="coach">
+              <div class="row-flex gap-2" style="margin-bottom:var(--space-4);">
+                <span class="badge badge-type" id="profileRoleBadge-coach">WELLNESS_COACH</span>
+                <span class="badge badge-active" id="profileProviderBadge-coach">LOCAL</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profileName-coach">Name</label>
+                <input class="input" type="text" id="profileName-coach" name="name">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profileEmail-coach">Email</label>
+                <input class="input" type="email" id="profileEmail-coach" name="email" disabled>
+                <span class="field-help">Your email is your sign-in ID and can't be changed here.</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profilePhone-coach">Phone</label>
+                <input class="input" type="tel" id="profilePhone-coach" name="phone">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profileBio-coach">Bio</label>
+                <textarea class="input textarea" id="profileBio-coach" name="bio" rows="3"></textarea>
+              </div>
+              <button type="submit" id="profileSaveBtn-coach" class="btn btn-primary">Save changes</button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ADMIN DASHBOARD
+         Overview + Manage Users are unchanged, real, RBAC-guarded
+         endpoints. All Alarms is a read-only table (GET /api/admin/alarms)
+         since admins can view but not edit alarms they don't own.
+         ============================================================ -->
+    <section id="page-admin" class="page">
+      <div class="dash-shell">
+        <nav id="admin_nav" class="sidebar" aria-label="Admin navigation"></nav>
+
+        <div class="dash-content">
+
+          <div id="admin-overview" class="view">
+            <p class="text-muted" id="adminGreeting" style="margin-bottom:var(--space-4);">Everything, all at once.</p>
+            <h2>Overview</h2>
+            <p class="text-muted">Platform-wide totals, live from the database.</p>
+            <div class="grid-3">
+              <div class="stat-card">
+                <span class="stat-card-label">Total users</span>
+                <span class="stat-card-value accent" id="stat-total-users">—</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card-label">Total alarms</span>
+                <span class="stat-card-value" id="stat-total-alarms">—</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card-label">Active alarms</span>
+                <span class="stat-card-value" id="stat-active-alarms">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="admin-users" class="view">
+            <h2>Manage Users</h2>
+            <table class="data-table">
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Role</th><th>Alarms</th><th>Joined</th></tr>
+              </thead>
+              <tbody id="adminUsersBody">
+                <tr><td colspan="5" class="text-muted">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="admin-alarms" class="view">
+            <h2>All Alarms</h2>
+            <p class="text-muted">Read-only — alarms belong to their owner and can only be edited from that user's own dashboard.</p>
+            <table class="data-table">
+              <thead>
+                <tr><th>Title</th><th>Time</th><th>Type</th><th>Status</th><th>Owner</th><th>Created</th></tr>
+              </thead>
+              <tbody id="adminAlarmsBody">
+                <tr><td colspan="6" class="text-muted">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="admin-profile" class="view">
+            <h2>About you</h2>
+            <form id="profileForm-admin" class="profile-form card" data-suffix="admin">
+              <div class="row-flex gap-2" style="margin-bottom:var(--space-4);">
+                <span class="badge badge-type" id="profileRoleBadge-admin">ADMIN</span>
+                <span class="badge badge-active" id="profileProviderBadge-admin">LOCAL</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profileName-admin">Name</label>
+                <input class="input" type="text" id="profileName-admin" name="name">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profileEmail-admin">Email</label>
+                <input class="input" type="email" id="profileEmail-admin" name="email" disabled>
+                <span class="field-help">Your email is your sign-in ID and can't be changed here.</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profilePhone-admin">Phone</label>
+                <input class="input" type="tel" id="profilePhone-admin" name="phone">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="profileBio-admin">Bio</label>
+                <textarea class="input textarea" id="profileBio-admin" name="bio" rows="3"></textarea>
+              </div>
+              <button type="submit" id="profileSaveBtn-admin" class="btn btn-primary">Save changes</button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       Shared alarm create/edit modal — used by every dashboard's
+       Alarm Manager. Fields map 1:1 to AlarmCreate / AlarmUpdate.
+       ============================================================ -->
+  <div class="modal-overlay" id="alarmModal" hidden aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="alarmModalTitle">
+      <h3 class="modal-title" id="alarmModalTitle">New alarm</h3>
+
+      <form id="alarmModalForm">
+        <div class="field-group">
+          <label class="field-label" for="alarmTitleInput">Title <span class="required" aria-hidden="true">*</span></label>
+          <input class="input" type="text" id="alarmTitleInput" name="title" required maxlength="100">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="alarmTimeInput">Time (24-hour) <span class="required" aria-hidden="true">*</span></label>
+          <input class="input" type="time" id="alarmTimeInput" name="alarm_time" required>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="alarmTypeInput">Repeat</label>
+          <select class="select" id="alarmTypeInput" name="alarm_type">
+            <option value="DAILY">Daily — Rings every day, same time.</option>
+            <option value="WEEKDAY">Weekday — Mon–Fri only. Weekends stay yours.</option>
+            <option value="WEEKEND">Weekend — Sat & Sun — for the slow mornings.</option>
+            <option value="ONE_TIME">One-Time — Rings once, then forgets itself.</option>
+            <option value="SMART_ADAPTIVE">Smart Adaptive — Learns from your snoozes and nudges itself closer to when you actually get up.</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Days</label>
+          <div class="day-picker">
+            <button type="button" class="day-pill" data-day="MON" aria-pressed="false" onclick="toggleDayPill(this)">M</button>
+            <button type="button" class="day-pill" data-day="TUE" aria-pressed="false" onclick="toggleDayPill(this)">T</button>
+            <button type="button" class="day-pill" data-day="WED" aria-pressed="false" onclick="toggleDayPill(this)">W</button>
+            <button type="button" class="day-pill" data-day="THU" aria-pressed="false" onclick="toggleDayPill(this)">T</button>
+            <button type="button" class="day-pill" data-day="FRI" aria-pressed="false" onclick="toggleDayPill(this)">F</button>
+            <button type="button" class="day-pill" data-day="SAT" aria-pressed="false" onclick="toggleDayPill(this)">S</button>
+            <button type="button" class="day-pill" data-day="SUN" aria-pressed="false" onclick="toggleDayPill(this)">S</button>
+          </div>
+          <span class="field-help">Only needed for Weekdays or Weekends.</span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="alarmDifficultyInput">Difficulty</label>
+          <select class="select" id="alarmDifficultyInput" name="difficulty_level">
+            <option value="EASY">Easy — One tap to dismiss.</option>
+            <option value="MEDIUM">Medium — A quick puzzle before it stops.</option>
+            <option value="HARD">Hard — No mercy. You'll be awake by the time you solve it.</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="alarmSoundInput">Sound</label>
+          <input class="input" type="text" id="alarmSoundInput" name="sound" placeholder="default" maxlength="100">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeAlarmModal()">Cancel</button>
+          <button type="submit" id="alarmModalSubmit" class="btn btn-primary">Save alarm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Alarm Trigger Overlay -->
+  <div id="alarmTriggerOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="alarmTriggerTitle">
+    <div class="modal modal-alarm-trigger">
+      <div class="stack gap-4" style="text-align:center;">
+        <div style="font-size:var(--text-2xl);font-size:clamp(2rem,3rem,4rem);" aria-hidden="true">⏰</div>
+        <h2 id="alarmTriggerTitle">Alarm Ringing!</h2>
+        <p id="alarmTriggerMessage" class="text-md text-muted">Your alarm is ringing.</p>
+        
+        <div class="row-flex gap-2" style="justify-content:center; margin-top:var(--space-6);">
+          <button type="button" class="btn btn-secondary" onclick="dismissAlarm()">I'm up</button>
+          <button type="button" class="btn btn-primary" onclick="snoozeAlarm()">Snooze</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/alarms.js"></script>
+  <script src="js/alarm-audio.js"></script>
+  <script src="js/main.js"></script>
+</div>
+</body>
+</html>

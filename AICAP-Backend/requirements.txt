@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-dotenv
+python-jose
+bcrypt
+authlib
+httpx
+jinja2
+python-multipart
+email-validator
+itsdangerous
+apscheduler
