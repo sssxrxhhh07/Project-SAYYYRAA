@@ -1,13 +1,13 @@
 from datetime import datetime, time, timedelta
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from database import get_db
 from auth import get_current_user
 from models import User, Alarm, AlarmTypeEnum
-from schemas import AlarmCreate, AlarmUpdate, AlarmOut
+from schemas import AlarmCreate, AlarmUpdate, AlarmOut, SnoozeRequest, DismissRequest
 from scheduler import add_or_update_alarm_job, remove_alarm_job
 from smart_adaptive import SmartAdaptiveAlgorithm
 
@@ -15,6 +15,8 @@ router = APIRouter(
     prefix="/alarms",
     tags=["Alarms"]
 )
+
+DEFAULT_SNOOZE_MINUTES = 5
 
 DAY_MAP = {
     0: "MON",
@@ -388,14 +390,23 @@ def disable_alarm(
 @router.patch("/{alarm_id}/snooze", response_model=AlarmOut)
 def snooze_alarm(
     alarm_id: int,
-    snooze_minutes: int = 5,
+    snooze_minutes: Optional[int] = Query(default=None, ge=1, le=720),
+    payload: Optional[SnoozeRequest] = Body(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
     Snooze an alarm for a specified duration.
     Records the snooze event for SMART_ADAPTIVE learning.
+
+    The duration may be supplied as a query parameter or in a JSON body;
+    it defaults to 5 minutes when neither is present.
     """
+    if snooze_minutes is None and payload is not None:
+        snooze_minutes = payload.snooze_minutes
+    if snooze_minutes is None:
+        snooze_minutes = DEFAULT_SNOOZE_MINUTES
+
     alarm = (
         db.query(Alarm)
         .filter(Alarm.id == alarm_id, Alarm.user_id == current_user.id)
@@ -442,14 +453,23 @@ def snooze_alarm(
 @router.post("/{alarm_id}/dismiss")
 def dismiss_alarm(
     alarm_id: int,
-    seconds_to_dismiss: int = 0,
+    seconds_to_dismiss: Optional[int] = Query(default=None, ge=0, le=86_400),
+    payload: Optional[DismissRequest] = Body(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """
     Record alarm dismissal for SMART_ADAPTIVE learning.
     Disables ONE_TIME alarms after dismissal.
+
+    The elapsed time may be supplied as a query parameter or in a JSON body;
+    it defaults to 0 when neither is present.
     """
+    if seconds_to_dismiss is None and payload is not None:
+        seconds_to_dismiss = payload.seconds_to_dismiss
+    if seconds_to_dismiss is None:
+        seconds_to_dismiss = 0
+
     alarm = (
         db.query(Alarm)
         .filter(Alarm.id == alarm_id, Alarm.user_id == current_user.id)

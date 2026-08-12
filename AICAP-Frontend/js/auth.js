@@ -115,5 +115,7 @@ function logoutUser() {
     });
   }
   window.location.hash = "#/";
+  // hashchange doesn't fire when the hash is already "#/", so re-render directly
+  route();
   showToast("Signed out successfully.", "success");
 }

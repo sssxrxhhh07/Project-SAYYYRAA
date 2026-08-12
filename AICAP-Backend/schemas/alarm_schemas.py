@@ -75,6 +75,14 @@ class AlarmUpdate(BaseModel):
     _check_days = field_validator("repeat_days")(_validate_days)
 
 
+class SnoozeRequest(BaseModel):
+    snooze_minutes: Optional[int] = Field(default=None, ge=1, le=720)
+
+
+class DismissRequest(BaseModel):
+    seconds_to_dismiss: Optional[int] = Field(default=None, ge=0, le=86_400)
+
+
 class AlarmOut(BaseModel):
     id: int
     user_id: int

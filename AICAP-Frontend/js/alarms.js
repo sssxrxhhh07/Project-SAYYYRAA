@@ -148,6 +148,22 @@ async function loadAlarmManagerView(containerId = "alarmsContainer", bannerId = 
   }
 }
 
+/* ---------- Refresh every alarm list currently on screen ----------
+   Snooze/dismiss mutate the alarm server-side from the ringing
+   overlay, which can sit on top of any dashboard view, so refresh
+   whichever lists that dashboard actually renders. */
+
+async function refreshAlarmViews() {
+  const jobs = [loadAlarmManagerView(_activeAlarmsContainerId, _activeBannerId)];
+  if (document.getElementById("todayAlarmsContainer")?.closest(".view")?.classList.contains("active")) {
+    jobs.push(_loadTodayView());
+  }
+  if (document.getElementById("upcomingAlarmsContainer")?.closest(".view")?.classList.contains("active")) {
+    jobs.push(_loadUpcomingView());
+  }
+  await Promise.allSettled(jobs);
+}
+
 /* ---------- Render next-alarm banner ---------- */
 
 function renderNextAlarmBanner(nextResult, bannerId = "nextAlarmBanner") {
