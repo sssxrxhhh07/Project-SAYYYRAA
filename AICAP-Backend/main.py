@@ -14,13 +14,14 @@ from routers import (
     profile_routes,
     admin_routes,
     alarm_routes,
+    challenge_routes,
 )
 
 # ==========================================
 # Create Database Tables
 # ==========================================
 
-# Create all tables including the new AlarmEvent table
+# Create all tables including AlarmEvent and ChallengeAttempt
 Base.metadata.create_all(bind=engine)
 
 
@@ -43,7 +44,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="AICAP Backend",
-    description="Module 1 (Auth & RBAC) and Module 3 (Alarm Scheduling System)",
+    description=(
+        "Module 1 (Auth & RBAC), Module 3 (Alarm Scheduling System) "
+        "and Module 4 (Cognitive Challenge System)"
+    ),
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -80,3 +84,4 @@ app.include_router(auth_routes.router)
 app.include_router(profile_routes.router)
 app.include_router(admin_routes.router)
 app.include_router(alarm_routes.router)
+app.include_router(challenge_routes.router)

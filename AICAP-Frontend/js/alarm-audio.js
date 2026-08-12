@@ -217,6 +217,15 @@ const AlarmAudio = {
       console.log('Snooze functionality would update alarm time +5 minutes');
       showToast('Snoozed. We\'ll remember that.', 'info');
     }
+
+    if (typeof CognitiveChallenge !== 'undefined') {
+      CognitiveChallenge.reset();
+    }
+
+    // The alarm's server-side state just changed, so redraw the lists that show it.
+    if (typeof refreshAlarmViews === 'function') {
+      await refreshAlarmViews();
+    }
   },
 
   /**
@@ -354,6 +363,12 @@ const AlarmMonitor = {
       if (message) {
         message.textContent = `${alarm.title} - ${displayTime}`;
       }
+    }
+
+    // Module 4: a cognitive challenge gates "I'm up", which stays hidden until
+    // the challenge is solved or the fallback unlocks it.
+    if (typeof CognitiveChallenge !== 'undefined') {
+      CognitiveChallenge.start(alarm.id);
     }
     
     // Show toast notification

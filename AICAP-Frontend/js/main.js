@@ -21,6 +21,7 @@ const ROLE_CONFIG = {
       { id: "alarms",   label: "Alarms",   icon: "🔔" },
       { id: "today",    label: "Today",        icon: "📅" },
       { id: "upcoming", label: "Upcoming",     icon: "⏩" },
+      { id: "challenges", label: "Challenges", icon: "🧠" },
       { id: "profile",  label: "Profile",      icon: "👤" },
     ],
   },
@@ -358,6 +359,7 @@ async function _loadViewData(role, viewId) {
     if (viewId === "alarms")   await loadAlarmManagerView("alarmsContainer", "nextAlarmBanner");
     if (viewId === "today")    await _loadTodayView();
     if (viewId === "upcoming") await _loadUpcomingView();
+    if (viewId === "challenges") await loadChallengeStatsView();
   }
 
   if (role === "WELLNESS_COACH") {

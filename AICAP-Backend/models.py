@@ -1,9 +1,10 @@
 """
 SQLAlchemy ORM Models — AICAP-Backend
 =====================================
-Source of truth for the `users` and `alarms` tables, matching:
+Source of truth for the `users`, `alarms` and `challenge_attempts` tables, matching:
   - Module 1 Guide (Auth & RBAC)
   - Module 3 Guide (Alarm Scheduling System)
+  - Module 4 Guide (Cognitive Challenge System)
 """
 
 from datetime import datetime
@@ -11,6 +12,7 @@ import enum
 
 from sqlalchemy import (
     Column,
+    Index,
     Integer,
     String,
     Boolean,
@@ -52,6 +54,22 @@ class DifficultyEnum(str, enum.Enum):
     HARD = "HARD"
 
 
+class ChallengeTypeEnum(str, enum.Enum):
+    MATH = "MATH"
+    LOGIC_PUZZLE = "LOGIC_PUZZLE"
+    MEMORY = "MEMORY"
+    WORD_GAME = "WORD_GAME"
+    PATTERN_RECOGNITION = "PATTERN_RECOGNITION"
+    RIDDLE = "RIDDLE"
+    QUICK_QUIZ = "QUICK_QUIZ"
+
+
+class ChallengeStatusEnum(str, enum.Enum):
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
 # ==========================================
 # Users
 # ==========================================
@@ -88,9 +106,24 @@ class User(Base):
         nullable=False,
     )
 
+    # Module 4: adaptive per-user challenge difficulty. An alarm whose
+    # difficulty_level is left at the EASY default follows this level;
+    # explicitly choosing MEDIUM/HARD on an alarm overrides it.
+    current_difficulty = Column(
+        SAEnum(DifficultyEnum, name="user_challenge_difficulty", native_enum=False, length=16),
+        default=DifficultyEnum.EASY,
+        nullable=False,
+    )
+
     alarms = relationship(
         "Alarm",
         back_populates="owner",
+        cascade="all, delete-orphan",
+    )
+
+    challenge_attempts = relationship(
+        "ChallengeAttempt",
+        back_populates="user",
         cascade="all, delete-orphan",
     )
 
@@ -148,6 +181,16 @@ class Alarm(Base):
     )
 
     owner = relationship("User", back_populates="alarms")
+    events = relationship(
+        "AlarmEvent",
+        back_populates="alarm",
+        cascade="all, delete-orphan",
+    )
+    challenge_attempts = relationship(
+        "ChallengeAttempt",
+        back_populates="alarm",
+        cascade="all, delete-orphan",
+    )
 
 
 # ==========================================
@@ -169,4 +212,72 @@ class AlarmEvent(Base):
     seconds_to_dismiss = Column(Integer, nullable=True)  # Time from trigger to dismiss
     snooze_duration = Column(Integer, nullable=True)  # Snooze duration in minutes
 
-    alarm = relationship("Alarm", backref="events")
+    alarm = relationship("Alarm", back_populates="events")
+
+
+# ==========================================
+# Cognitive Challenge Attempts (Module 4)
+# ==========================================
+
+class ChallengeAttempt(Base):
+    __tablename__ = "challenge_attempts"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    alarm_id = Column(
+        Integer,
+        ForeignKey("alarms.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+
+    challenge_type = Column(
+        SAEnum(ChallengeTypeEnum, name="challenge_type", native_enum=False, length=32),
+        nullable=False,
+    )
+    difficulty = Column(
+        SAEnum(DifficultyEnum, name="challenge_difficulty", native_enum=False, length=16),
+        nullable=False,
+    )
+
+    # What the user actually saw, so /submit validates against the exact
+    # problem instead of regenerating a differently randomized one.
+    prompt_snapshot = Column(String, nullable=False)
+    options_json = Column(String, nullable=True)   # JSON list for MCQ-style prompts
+    metadata_json = Column(String, nullable=True)  # JSON dict, e.g. MEMORY sequence
+    answer_format = Column(String, nullable=False)  # text | number | mcq | sequence
+    correct_answer = Column(String, nullable=False)  # server-only, never serialized
+
+    status = Column(
+        SAEnum(ChallengeStatusEnum, name="challenge_status", native_enum=False, length=16),
+        default=ChallengeStatusEnum.IN_PROGRESS,
+        nullable=False,
+    )
+    is_correct = Column(Boolean, nullable=True)
+
+    attempts_used = Column(Integer, default=0, nullable=False)
+    max_attempts = Column(Integer, nullable=False)
+
+    time_taken_seconds = Column(Integer, nullable=True)
+    time_limit_seconds = Column(Integer, nullable=False)
+
+    score = Column(Integer, default=0, nullable=False)
+
+    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    completed_at = Column(DateTime, nullable=True)
+
+    user = relationship("User", back_populates="challenge_attempts")
+    alarm = relationship("Alarm", back_populates="challenge_attempts")
+
+    # Selection logic queries "recent attempts for this user", optionally
+    # narrowed to one challenge type, on every alarm trigger.
+    __table_args__ = (
+        Index("ix_challenge_attempts_user_started", "user_id", "started_at"),
+        Index("ix_challenge_attempts_user_type", "user_id", "challenge_type"),
+    )

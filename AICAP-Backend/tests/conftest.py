@@ -12,6 +12,7 @@ are imported, because ``database.py`` builds its engine at import time.
 import os
 import sys
 import tempfile
+from datetime import datetime
 from pathlib import Path
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
@@ -37,6 +38,9 @@ from models import (  # noqa: E402
     AlarmEvent,
     AlarmTypeEnum,
     Base,
+    ChallengeAttempt,
+    ChallengeStatusEnum,
+    ChallengeTypeEnum,
     DifficultyEnum,
     ProviderEnum,
     RoleEnum,
@@ -144,6 +148,41 @@ def make_event(db):
         db.commit()
         db.refresh(event)
         return event
+
+    return _make
+
+
+@pytest.fixture
+def make_attempt(db):
+    """A challenge attempt, resolved by default so history rules see it."""
+
+    def _make(user, **overrides):
+        fields = dict(
+            user_id=user.id,
+            alarm_id=None,
+            challenge_type=ChallengeTypeEnum.MATH,
+            difficulty=DifficultyEnum.EASY,
+            prompt_snapshot="What is 2 + 2?",
+            options_json=None,
+            metadata_json=None,
+            answer_format="number",
+            correct_answer="4",
+            status=ChallengeStatusEnum.COMPLETED,
+            is_correct=True,
+            attempts_used=1,
+            max_attempts=3,
+            time_taken_seconds=10,
+            time_limit_seconds=90,
+            score=10,
+            started_at=datetime.utcnow(),
+            completed_at=datetime.utcnow(),
+        )
+        fields.update(overrides)
+        attempt = ChallengeAttempt(**fields)
+        db.add(attempt)
+        db.commit()
+        db.refresh(attempt)
+        return attempt
 
     return _make
 

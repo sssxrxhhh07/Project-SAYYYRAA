@@ -4,7 +4,7 @@ from datetime import datetime, time
 
 import pytest
 
-from models import Alarm, AlarmTypeEnum, DifficultyEnum
+from models import Alarm, AlarmEvent, AlarmTypeEnum, DifficultyEnum
 from routers.alarm_routes import calculate_next_trigger, parse_alarm_time
 
 # 2024-01-03 is a Wednesday, 2024-01-06 a Saturday.
@@ -507,3 +507,131 @@ def test_check_next_returns_closest_alarm(client, make_user, make_alarm, auth_he
     assert body["time_remaining_seconds"] > 0
     assert body["alarm"]["title"] in {"Later today", "Tomorrow"}
     assert body["next_trigger_at"] is not None
+
+
+# ==========================================
+# Regressions found by end-to-end testing
+# ==========================================
+
+def test_delete_alarm_with_event_history(
+    client, db, make_user, make_alarm, auth_headers
+):
+    """Deleting a rung alarm used to 500 on alarm_events.alarm_id NOT NULL."""
+    user = make_user()
+    alarm = make_alarm(user, alarm_time="07:00")
+    headers = auth_headers(user)
+    alarm_id = alarm.id
+
+    client.patch(f"/alarms/{alarm_id}/snooze", headers=headers, json={"snooze_minutes": 5})
+    client.post(f"/alarms/{alarm_id}/dismiss", headers=headers, json={"seconds_to_dismiss": 9})
+
+    response = client.delete(f"/alarms/{alarm_id}", headers=headers)
+
+    assert response.status_code == 200
+    db.expire_all()
+    assert db.query(Alarm).filter(Alarm.id == alarm_id).first() is None
+    assert db.query(AlarmEvent).filter(AlarmEvent.alarm_id == alarm_id).count() == 0
+
+
+def test_snooze_reads_minutes_from_json_body(client, make_user, make_alarm, auth_headers):
+    user = make_user()
+    alarm = make_alarm(user, alarm_time="07:00")
+
+    body = client.patch(
+        f"/alarms/{alarm.id}/snooze",
+        headers=auth_headers(user),
+        json={"snooze_minutes": 20},
+    ).json()
+
+    assert body["alarm_time"] == "07:20"
+
+
+def test_snooze_body_default_falls_back_to_five_minutes(
+    client, make_user, make_alarm, auth_headers
+):
+    user = make_user()
+    alarm = make_alarm(user, alarm_time="07:00")
+
+    body = client.patch(
+        f"/alarms/{alarm.id}/snooze",
+        headers=auth_headers(user),
+        json={"snooze_minutes": None},
+    ).json()
+
+    assert body["alarm_time"] == "07:05"
+
+
+def test_snooze_query_parameter_still_wins_over_body(
+    client, make_user, make_alarm, auth_headers
+):
+    user = make_user()
+    alarm = make_alarm(user, alarm_time="07:00")
+
+    body = client.patch(
+        f"/alarms/{alarm.id}/snooze?snooze_minutes=30",
+        headers=auth_headers(user),
+        json={"snooze_minutes": 5},
+    ).json()
+
+    assert body["alarm_time"] == "07:30"
+
+
+def test_snooze_rejects_out_of_range_body_value(client, make_user, make_alarm, auth_headers):
+    user = make_user()
+    alarm = make_alarm(user)
+
+    response = client.patch(
+        f"/alarms/{alarm.id}/snooze",
+        headers=auth_headers(user),
+        json={"snooze_minutes": 0},
+    )
+
+    assert response.status_code == 422
+
+
+def test_dismiss_reads_seconds_from_json_body(
+    client, db, make_user, make_alarm, auth_headers
+):
+    user = make_user()
+    alarm = make_alarm(user)
+
+    client.post(
+        f"/alarms/{alarm.id}/dismiss",
+        headers=auth_headers(user),
+        json={"seconds_to_dismiss": 42},
+    )
+
+    db.expire_all()
+    assert db.get(Alarm, alarm.id).avg_dismiss_time == 42
+
+
+def test_dismiss_body_default_records_zero_seconds(
+    client, db, make_user, make_alarm, auth_headers
+):
+    user = make_user()
+    alarm = make_alarm(user)
+
+    client.post(
+        f"/alarms/{alarm.id}/dismiss",
+        headers=auth_headers(user),
+        json={"seconds_to_dismiss": None},
+    )
+
+    db.expire_all()
+    assert db.get(Alarm, alarm.id).avg_dismiss_time == 0
+
+
+def test_dismiss_query_parameter_still_wins_over_body(
+    client, db, make_user, make_alarm, auth_headers
+):
+    user = make_user()
+    alarm = make_alarm(user)
+
+    client.post(
+        f"/alarms/{alarm.id}/dismiss?seconds_to_dismiss=7",
+        headers=auth_headers(user),
+        json={"seconds_to_dismiss": 99},
+    )
+
+    db.expire_all()
+    assert db.get(Alarm, alarm.id).avg_dismiss_time == 7

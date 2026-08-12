@@ -194,6 +194,12 @@
             <div id="upcomingAlarmsContainer" class="stack gap-4"></div>
           </div>
 
+          <div id="user-challenges" class="view">
+            <h2>Challenges</h2>
+            <p class="text-muted">How you've been doing on the puzzles that turn your alarms off.</p>
+            <div id="challengeStatsContainer"></div>
+          </div>
+
           <div id="user-profile" class="view">
             <h2>About you</h2>
             <form id="profileForm-user" class="profile-form card" data-suffix="user">
@@ -441,9 +447,9 @@
         <div class="field-group">
           <label class="field-label" for="alarmDifficultyInput">Difficulty</label>
           <select class="select" id="alarmDifficultyInput" name="difficulty_level">
-            <option value="EASY">Easy — One tap to dismiss.</option>
-            <option value="MEDIUM">Medium — A quick puzzle before it stops.</option>
-            <option value="HARD">Hard — No mercy. You'll be awake by the time you solve it.</option>
+            <option value="EASY">Adaptive — Starts gentle, gets harder as you get sharper.</option>
+            <option value="MEDIUM">Medium — Always a real puzzle before it stops.</option>
+            <option value="HARD">Hard — No mercy, one shot. You'll be awake by the time you solve it.</option>
           </select>
         </div>
 
@@ -467,9 +473,17 @@
         <div style="font-size:var(--text-2xl);font-size:clamp(2rem,3rem,4rem);" aria-hidden="true">⏰</div>
         <h2 id="alarmTriggerTitle">Alarm Ringing!</h2>
         <p id="alarmTriggerMessage" class="text-md text-muted">Your alarm is ringing.</p>
-        
+
+        <!-- Module 4: the cognitive challenge that gates dismissal. -->
+        <div id="challengePanel" class="card" hidden>
+          <div id="challengeBody"></div>
+        </div>
+        <p id="challengeFallbackNote" class="text-sm text-muted" hidden>
+          That one wasn't fair — you can turn the alarm off without solving it.
+        </p>
+
         <div class="row-flex gap-2" style="justify-content:center; margin-top:var(--space-6);">
-          <button type="button" class="btn btn-secondary" onclick="dismissAlarm()">I'm up</button>
+          <button type="button" id="alarmDismissBtn" class="btn btn-secondary" onclick="dismissAlarm()">I'm up</button>
           <button type="button" class="btn btn-primary" onclick="snoozeAlarm()">Snooze</button>
         </div>
       </div>
@@ -479,6 +493,7 @@
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/alarms.js"></script>
+  <script src="js/challenge.js"></script>
   <script src="js/alarm-audio.js"></script>
   <script src="js/main.js"></script>
 </div>

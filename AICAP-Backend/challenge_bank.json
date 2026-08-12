@@ -1,0 +1,43 @@
+{
+  "words": {
+    "EASY": ["moon", "dawn", "rise", "beam", "calm", "rest", "warm", "bell"],
+    "MEDIUM": ["sunrise", "morning", "pillow", "snooze", "asleep", "awaken", "coffee", "shutter"],
+    "HARD": ["daybreak", "nightfall", "restless", "hibernate", "alertness", "wakefulness", "sleepwalker", "circadian"]
+  },
+  "riddles": {
+    "EASY": [
+      {"prompt": "I have hands and a face, but no arms or eyes. What am I?", "answer": "clock", "accepts": ["a clock", "the clock"]},
+      {"prompt": "What comes once in a minute, twice in a moment, but never in a thousand years?", "answer": "m", "accepts": ["the letter m"]},
+      {"prompt": "What gets wetter the more it dries?", "answer": "towel", "accepts": ["a towel"]}
+    ],
+    "MEDIUM": [
+      {"prompt": "I am not alive, but I grow; I have no lungs, but I need air. What am I?", "answer": "fire", "accepts": ["a fire", "flame"]},
+      {"prompt": "The more of me you take, the more you leave behind. What am I?", "answer": "footsteps", "accepts": ["footprints", "steps"]},
+      {"prompt": "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?", "answer": "echo", "accepts": ["an echo"]}
+    ],
+    "HARD": [
+      {"prompt": "I am always in front of you but can never be seen. Every plan is made for me, yet I never arrive. What am I?", "answer": "the future", "accepts": ["future", "tomorrow"]},
+      {"prompt": "Forward I am heavy, but backward I am not. What am I?", "answer": "ton", "accepts": ["a ton", "the word ton"]},
+      {"prompt": "I have keys but open no locks, space but no room, and you can enter but not go inside. What am I?", "answer": "keyboard", "accepts": ["a keyboard", "computer keyboard"]}
+    ]
+  },
+  "quiz": {
+    "EASY": [
+      {"prompt": "How many minutes are in one hour?", "options": ["30", "60", "90", "100"], "answer": "60"},
+      {"prompt": "Which planet do we live on?", "options": ["Mars", "Venus", "Earth", "Jupiter"], "answer": "Earth"},
+      {"prompt": "What colour is the sky on a clear day?", "options": ["Green", "Blue", "Red", "Brown"], "answer": "Blue"}
+    ],
+    "MEDIUM": [
+      {"prompt": "Which sleep stage is REM sleep most associated with?", "options": ["Deep restorative rest", "Vivid dreaming", "Sleepwalking", "Snoring"], "answer": "Vivid dreaming"},
+      {"prompt": "Roughly how long is one full human sleep cycle?", "options": ["30 minutes", "90 minutes", "3 hours", "6 hours"], "answer": "90 minutes"},
+      {"prompt": "What is the term for the body's internal 24-hour clock?", "options": ["Circadian rhythm", "Metabolic rate", "Sleep debt", "Melatonin curve"], "answer": "Circadian rhythm"}
+    ],
+    "HARD": [
+      {"prompt": "Which hormone rises in the evening to promote sleep onset?", "options": ["Cortisol", "Melatonin", "Insulin", "Adrenaline"], "answer": "Melatonin"},
+      {"prompt": "Sleep inertia is best described as which of the following?", "options": ["Difficulty falling asleep", "Grogginess right after waking", "Waking too early", "Dreaming while awake"], "answer": "Grogginess right after waking"},
+      {"prompt": "Which brain wave pattern dominates N3 deep sleep?", "options": ["Alpha waves", "Beta waves", "Delta waves", "Gamma waves"], "answer": "Delta waves"}
+    ]
+  },
+  "logic_subjects": ["Ana", "Ben", "Cara", "Dev", "Elle", "Finn", "Gus", "Hana", "Iris", "Jonas"],
+  "memory_colors": ["RED", "BLUE", "GREEN", "AMBER", "TEAL", "PLUM", "LIME", "CYAN"]
+}

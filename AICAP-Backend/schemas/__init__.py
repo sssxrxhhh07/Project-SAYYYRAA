@@ -1,7 +1,7 @@
 """
 Schemas Package Init
 ====================
-Exports all Pydantic schemas for auth, profile, and alarms.
+Exports all Pydantic schemas for auth, profile, alarms, and challenges.
 """
 
 from schemas.user_schemas import (
@@ -18,6 +18,18 @@ from schemas.alarm_schemas import (
     AlarmCreate,
     AlarmUpdate,
     AlarmOut,
+    SnoozeRequest,
+    DismissRequest,
+)
+
+from schemas.challenge_schemas import (
+    StartChallengeRequest,
+    SubmitAnswerRequest,
+    ChallengeOut,
+    SubmitResultOut,
+    AttemptOut,
+    TypeBreakdown,
+    ChallengeStatsOut,
 )
 
 __all__ = [
@@ -31,4 +43,13 @@ __all__ = [
     "AlarmCreate",
     "AlarmUpdate",
     "AlarmOut",
+    "SnoozeRequest",
+    "DismissRequest",
+    "StartChallengeRequest",
+    "SubmitAnswerRequest",
+    "ChallengeOut",
+    "SubmitResultOut",
+    "AttemptOut",
+    "TypeBreakdown",
+    "ChallengeStatsOut",
 ]
